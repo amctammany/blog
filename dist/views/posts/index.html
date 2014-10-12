@@ -1,0 +1,67 @@
+<% include ../header.html %>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-3 col-md-3 col-sm-4">
+      <div class="well post-sidebar">
+        <form class="form" action="/posts/search" method="GET">
+        <div class="input-group">
+          <input class="form-control" name="q" type="text" placeholder="Search"  value=""/>
+          <span class="input-group-addon">
+            <button type="submit" >
+              <span class="glyphicon glyphicon-search" ></span>
+            </button>
+          </span>
+        </div>
+      </form>
+        <div class="tag-listings">
+            <% tags.forEach(function (tag) { %>
+              <span class="label label-default">
+                <!--<span class="badge"><%= tag.posts.length %></span>-->
+                <%= tag.name %>
+              </span>
+            <% }) %>
+        </div>
+        
+      </div>
+    </div>
+
+    <div class="col-lg-9 col-md-9 col-sm-8">
+      <% posts.forEach(function(post) { %>
+        <div class="post well">
+          <div class="post-body">
+            <header>
+              <div class="title">
+                <a href="/posts/<%= post.urlString %>"><%= post.title %></a>
+              
+              </div>
+              <div class="details">
+                <div class="timestamp">
+                  <span class="glyphicon glyphicon-calendar"></span>
+                  <span class="timestamp"><%= (new Date(post.createdAt)).toDateString() %></span>
+                </div>
+                <div class="tags">
+                 <span class="glyphicon glyphicon-tags"></span>
+                <% post.tags.forEach(function (tag) { %>
+                  <a href="/tags/<%= tag.name %>" class="tag"><%= tag.name %></a>
+
+                <% }) %>
+
+                </div>
+              
+              </div>
+            
+            </header>
+            <div class="content">
+              <%- post.html %>
+            </div>
+          </div>
+        </div>
+
+
+      <% }) %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% include ../footer.html %>
