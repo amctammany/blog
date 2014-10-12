@@ -3,6 +3,7 @@
 var gulp = require('gulp'),
     path = require('path'),
     stylish = require('jshint-stylish'),
+    rimraf = require('rimraf'),
     gulpLoadPlugins = require('gulp-load-plugins'),
     plugins = gulpLoadPlugins();
 
@@ -39,9 +40,8 @@ gulp.task('stylus', function () {
     .pipe(gulp.dest('app/styles/'));
 });
 
-gulp.task('clean', function () {
-  gulp.src('dist/**/*.*', {read: false})
-    .pipe(plugins.clean());
+gulp.task('clean', function (cb) {
+  rimraf('./dist', cb)
 });
 
 gulp.task('usemin', function () {
@@ -54,7 +54,7 @@ gulp.task('usemin', function () {
     .pipe(gulp.dest('dist/'));
 });
 
-gulp.task('build', ['clean', 'stylus', 'minify', 'jshint'], function () {
+gulp.task('build', ['clean', 'stylus', 'jshint'], function () {
   // Copy over HTML
   gulp.src('app/views/**/*.html')
     .pipe(gulp.dest('dist/views/'));
@@ -78,20 +78,21 @@ gulp.task('build', ['clean', 'stylus', 'minify', 'jshint'], function () {
 });
 
 gulp.task('jsdoc', function () {
-  gulp.src('doc/**/*.*', {read: false})
-    .pipe(plugins.clean());
+  gulp.src('doc/**/*', {read: false})
+    .pipe(rimraf());
   gulp.src('./src/**/*.js')
     .pipe(plugins.jsdoc('./doc'));
 });
 
-gulp.task('server', ['stylus', 'minify'], function () {
+gulp.task('serve', ['stylus', 'minify'], function () {
   process.env.NODE_ENV = 'development';
   require('./app').listen(3000);
   plugins.livereload.listen();
+});
+gulp.task('watch', function () {
   gulp.watch('app/styles/**/*.styl', ['stylus']);
   gulp.watch('src/**/*.js', ['minify']);
   gulp.watch(['app/scripts/**/*.js', 'app/views/**/*.html', 'app/styles/app.css']).on('change', plugins.livereload.changed);
-
 });
 
 gulp.task('default', ['jsdoc', 'build']);

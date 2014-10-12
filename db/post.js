@@ -9,7 +9,7 @@ var PostSchema = new Schema({
   title: String,
   tagNames: String,
   tags: [{type: Schema.Types.ObjectId, ref: 'Tag'}],
-  intro: String,
+  summary: String,
   content: String,
   html: String,
   urlString: String,

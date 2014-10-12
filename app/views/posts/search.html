@@ -1,7 +1,7 @@
 <% include ../header.html %>
 <div class="container-fluid">
   <div class="row">
-    <div class="col-lg-3 col-md-3 col-sm-4">
+    <div class="col-lg-12">
       <div class="well post-sidebar">
         <form class="form" action="/posts/search" method="GET">
         <div class="input-group">
@@ -12,7 +12,6 @@
             </button>
           </span>
         </div>
-      </form>
         <div class="tag-listings">
             <% tags.forEach(function (tag) { %>
               <span class="label label-default">
@@ -22,10 +21,11 @@
             <% }) %>
         </div>
         
+      </form>
       </div>
     </div>
 
-    <div class="col-lg-9 col-md-9 col-sm-8">
+    <div class="col-lg-12">
       <% posts.forEach(function(post) { %>
         <div class="post well">
           <div class="post-body">

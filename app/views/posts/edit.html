@@ -12,6 +12,11 @@
           <input type="text" class="form-control" name="tagNames" id="post-tag-names" placeholder="Tag Names" value="<%= post.tagNames %>" />
         </div>
         <div class="form-group">
+          <label for="post-summary">Summary</label>
+          <textarea class="form-control" id="post-summary" name="summary" cols="30" rows="5"></textarea>
+        </div>
+
+        <div class="form-group">
           <label for="post-content">Content</label>
           <textarea class="form-control" id="post-content" name="content" cols="30" rows="15"><%= post.content %></textarea>
         </div>

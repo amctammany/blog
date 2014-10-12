@@ -142,7 +142,7 @@ module.exports = function (app) {
       if (err) {console.log(err);}
       post.title = req.body.title;
       post.tagNames = req.body.tagNames.toLowerCase();
-      post.intro = req.body.intro;
+      post.summary = req.body.summary;
       post.content = req.body.content;
 
       post.save(function (err) {
