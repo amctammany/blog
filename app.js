@@ -20,8 +20,8 @@ if (mongoUrl) {
   });
 }
 
-require('./db');
 require('./config/environments')(app, passport);
+require('./db');
 require('./routes')(app, passport);
 
 module.exports = app;

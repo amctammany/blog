@@ -1,3 +1,5 @@
+'use strict';
+
 var express = require('express'),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser'),
@@ -9,6 +11,18 @@ var express = require('express'),
 module.exports = function (app) {
   var env = process.env.NODE_ENV || 'development';
   if ('development' === env) {
+  var mongoUrl = 'mongodb://db:dbpass@ds061318.mongolab.com:61318/amctammany';
+
+
+
+  if (mongoUrl) {
+    mongoose.connect(mongoUrl);
+    var db = mongoose.connection;
+    db.once('open', function () {
+      console.log('DB Connection Successful');
+    });
+  }
+
 
     app.use(function staticsPlaceholder(req, res, next) {
         return next();
