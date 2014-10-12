@@ -35,18 +35,18 @@ module.exports = function (app) {
     tags: tagsQuery.exec.bind(tagsQuery),
   };
 
-  //var searchQuery = function (q) {
-    //return Post.find(
-      //{$text: {$search: 'plexi'}}
-    //).populate('tags');
-  //};
-  //var searchResources = function (q) {
-    //var search = searchQuery(q);
-    //return {
-      //posts: search.exec.bind(search),
-      //tags: tagsQuery.exec.bind(tagsQuery),
-    //};
-  //};
+  var searchQuery = function (q) {
+    return Post.search(q, {title: 1}, {
+      limit: 10
+    });
+  };
+  var searchResources = function (q) {
+    var search = searchQuery(q);
+    return {
+      posts: search.exec.bind(searchQuery),
+      tags: tagsQuery.exec.bind(tagsQuery),
+    };
+  };
 
   // GET /posts => Index
   router.get('/', function (req, res) {
@@ -70,15 +70,33 @@ module.exports = function (app) {
   router.get('/search', function (req, res) {
     var q = req.query.q;
     var tags = req.query.tags;
-
-    async.parallel(resources, function (err, result) {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      console.log(result.posts);
-      res.render('posts/search', {posts: result.posts, tags: result.tags});
+    Post.find(
+      {$text: { $search: q}},
+      {score: {$meta: 'textScore'}}
+    )
+    .sort({score: {$meta: 'textScore'}})
+    .exec(function (err, posts) {
+      if (err) {console.log(err);}
+      res.render('posts/search', {posts: posts, tags: []});
     });
+
+    //Post.search(q, {title: 2}, {
+      //limit: 10,
+      //populate: [{path: 'Post', fields: '_id'}]
+    //}, function (err, data) {
+      //console.log(data);
+      //res.render('posts/search', {posts: data.results, tags: []});
+
+    //});
+
+    //async.parallel(searchResources(q), function (err, result) {
+      //if (err) {
+        //console.log(err);
+        //return;
+      //}
+      ////console.log(result.posts);
+      //res.render('posts/search', {posts: result.posts, tags: result.tags});
+    //});
 
   });
 

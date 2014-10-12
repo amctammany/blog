@@ -1,6 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose'),
+    //searchPlugin = require('mongoose-search-plugin'),
     Schema = mongoose.Schema,
     Showdown = require('showdown'),
     converter = new Showdown.converter();
@@ -16,7 +17,11 @@ var PostSchema = new Schema({
   createdAt: {type: Date, default: Date.now()}
 });
 
-//PostSchema.index({title: 'text', tagNames: 'text', intro: 'text'});
+//PostSchema.plugin(searchPlugin, {
+  //fields: ['title', 'summary', 'tagNames']
+//});
+
+PostSchema.index({title: 'text', tagNames: 'text', summary: 'text'});
 
 PostSchema.pre('save', function (next) {
   if (this.title) {
