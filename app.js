@@ -8,17 +8,17 @@ var app = express();
 app.directory = __dirname;
 
 
-var mongoUrl = 'mongodb://db:dbpass@ds061318.mongolab.com:61318/amctammany';
+//var mongoUrl = 'mongodb://db:dbpass@ds061318.mongolab.com:61318/amctammany';
 
 
 
-if (mongoUrl) {
-  mongoose.connect(mongoUrl);
-  var db = mongoose.connection;
-  db.once('open', function () {
-    console.log('DB Connection Successful');
-  });
-}
+//if (mongoUrl) {
+  //mongoose.connect(mongoUrl);
+  //var db = mongoose.connection;
+  //db.once('open', function () {
+    //console.log('DB Connection Successful');
+  //});
+//}
 
 require('./config/environments')(app, passport);
 require('./db');
