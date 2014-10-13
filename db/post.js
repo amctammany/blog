@@ -9,6 +9,7 @@ var mongoose = require('mongoose'),
 var PostSchema = new Schema({
   title: String,
   tagNames: String,
+  tagArray: [String],
   tags: [{type: Schema.Types.ObjectId, ref: 'Tag'}],
   summary: String,
   content: String,
@@ -41,6 +42,7 @@ PostSchema.methods.parseTags = function (cb) {
   if (!this.tagNames) {return cb();}
 
   var tagArray = this.tagNames.split(' ');
+  this.tagArray = tagArray;
   this.tags = [];
   var self = this;
   var findOrCreateTag = function (name) {

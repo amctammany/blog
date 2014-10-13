@@ -36,12 +36,15 @@ module.exports = function (app) {
   };
 
   var searchQuery = function (q, tags) {
+    tags = tags || [];
+    console.log(tags);
     return Post.find(
-      {$text: {$search: '*' + q + '*'}}
-    ).populate('tags').where('tags').in([tags])
+      {$text: {$search: q}}
+    )
+    .populate('tags');
   };
-  var searchResources = function (q) {
-    var search = searchQuery(q);
+  var searchResources = function (q, tags) {
+    var search = searchQuery(q, tags);
     return {
       posts: search.exec.bind(search),
       tags: tagsQuery.exec.bind(tagsQuery),
@@ -69,7 +72,7 @@ module.exports = function (app) {
   // GET /posts/search?q=query => Search
   router.get('/search', function (req, res) {
     var q = req.query.q;
-    var tags =  req.query.tags;
+    var tags =  req.query.tags || [];
     if (process.env.NODE_ENV === 'production') {
       async.parallel(searchResources(q, tags), function (err, result) {
         if (err) {
