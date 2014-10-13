@@ -43,7 +43,7 @@ module.exports = function (app) {
   var searchResources = function (q) {
     var search = searchQuery(q);
     return {
-      posts: search.exec.bind(searchQuery),
+      posts: search.exec.bind(search),
       tags: tagsQuery.exec.bind(tagsQuery),
     };
   };
