@@ -36,12 +36,12 @@ module.exports = function (app) {
   };
 
   var searchQuery = function (q, tags) {
-    tags = tags || [];
-    console.log(tags);
-    return Post.find(
+    return (!!q ? Post.find(
       {$text: {$search: q}}
-    )
-    .populate('tags');
+    ) : Post.find({}))
+      .populate('tags')
+      .where('tagArray').in(tags)
+
   };
   var searchResources = function (q, tags) {
     var search = searchQuery(q, tags);
@@ -53,7 +53,7 @@ module.exports = function (app) {
 
   // GET /posts => Index
   router.get('/', function (req, res) {
-    //console.log(req.query);
+    //console.log(req.Suery);
     //Post.find()
       //.populate('tags')
       //.exec(function (err, posts) {
@@ -73,24 +73,15 @@ module.exports = function (app) {
   router.get('/search', function (req, res) {
     var q = req.query.q;
     var tags =  req.query.tags || [];
-    if (process.env.NODE_ENV === 'production') {
-      async.parallel(searchResources(q, tags), function (err, result) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        //console.log(result.posts);
-        res.render('posts/search', {posts: result.posts, tags: result.tags, q: q, selectedTags: tags});
-      });
-    } else {
-      async.parallel(resources, function (err, result) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        res.render('posts/search', {posts: result.posts, tags: result.tags, q: q, selectedTags: tags});
-      });
-    }
+    tags = typeof tags === 'array' ? tags : [tags];
+    async.parallel(searchResources(q, tags), function (err, result) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      //console.log(result.posts);
+      res.render('posts/search', {posts: result.posts, tags: result.tags, q: q, selectedTags: tags});
+    });
 
   });
 

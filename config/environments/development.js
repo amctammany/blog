@@ -11,7 +11,7 @@ var express = require('express'),
 module.exports = function (app) {
   var env = process.env.NODE_ENV || 'development';
   if ('development' === env) {
-    var mongoUrl = 'mongodb://db:dbpass@ds061318.mongolab.com:61318/amctammany';
+    var mongoUrl = 'amctammany.com:27017/blog';
 
 
 
