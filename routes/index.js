@@ -44,7 +44,7 @@ module.exports = function (app, passport) {
   require('./admin')(app);
   //require('./demos')(app);
   require('./posts')(app);
-  //require('./tags')(app);
+  require('./tags')(app);
   //require('./projects')(app);
   var postsQuery = Post.find({}).populate('tags');
   var tagsQuery = Tag.find({});
