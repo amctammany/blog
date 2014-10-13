@@ -40,7 +40,7 @@ module.exports = function (app) {
       {$text: {$search: q}}
     ) : Post.find({}))
       .populate('tags')
-      .where('tagArray').in(tags)
+      .where('tagArray').in(tags);
 
   };
   var searchResources = function (q, tags) {
