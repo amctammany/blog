@@ -71,12 +71,11 @@ module.exports = function (app) {
     var q = req.query.q;
     var tags = req.query.tags;
     Post.find(
-      {$text: { $search: q}},
-      {score: {$meta: 'textScore'}}
+      {$text: { $search: q}}
     )
-    .sort({score: {$meta: 'textScore'}})
     .exec(function (err, posts) {
       if (err) {console.log(err);}
+      console.log(posts);
       res.render('posts/search', {posts: posts, tags: []});
     });
 
