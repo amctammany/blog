@@ -32,20 +32,25 @@
           <div class="post-body">
             <header>
               <div class="title">
-                <a href="/posts/<%= post.urlString %>"><%= post.title %></a>
+                <h1>
+                  <a href="/posts/<%= post.urlString %>"><%= post.title %></a>
+                </h1>
               
               </div>
               <div class="details">
                 <div class="timestamp">
-                  <span class="glyphicon glyphicon-calendar"></span>
-                  <span class="timestamp"><%= (new Date(post.createdAt)).toDateString() %></span>
+                  <h4>
+                    <span class="glyphicon glyphicon-calendar"></span>
+                    <span class="timestamp"><%= (new Date(post.createdAt)).toDateString() %></span>
+                  </h4>
                 </div>
                 <div class="tags">
-                 <span class="glyphicon glyphicon-tags"></span>
-                <% post.tags.forEach(function (tag) { %>
-                  <a href="/tags/<%= tag.name %>" class="tag"><%= tag.name %></a>
-
-                <% }) %>
+                  <h4>
+                    <span class="glyphicon glyphicon-tags"></span>
+                    <% post.tags.forEach(function (tag) { %>
+                      <a href="/tags/<%= tag.name %>" class="tag"><%= tag.name %></a>
+                    <% }) %>
+                  </h4>
 
                 </div>
               

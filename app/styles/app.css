@@ -9,25 +9,24 @@ body {
 }
 .post .post-body {
   padding: 20px;
-  background: #fafafa;
-  padding-bottom: 20px;
+  background: #afe;
+  padding-top: 0px;
 }
 .post header {
   border-radius: 3px;
-  background: #fafafa;
+  background: #1ca;
   padding: 5px;
+  margin-bottom: 10px;
 }
 .post header .title {
   display: block;
   width: 100%;
-  font: normal small-caps 1.4em Times New Roman, sans-serif;
+  font: normal small-caps 1.8em Times New Roman, sans-serif;
 }
 .post header .title .timestamp {
-  font-size: 0.7em;
   font-style: italic;
 }
 .post header .details .glyphicon {
-  height: 25px;
   vertical-align: top;
 }
 .post header .details .timestamp {
@@ -47,7 +46,7 @@ body {
   padding: 1px;
 }
 .post .content {
-  background: #fafafa;
+  background: #1ca;
   margin: 5px;
   padding: 5px;
 }
