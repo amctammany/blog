@@ -29,6 +29,15 @@ module.exports = function (app) {
   router.get('/login', function (req, res) {
     res.render('admin/login', {demo: 'Particle'});
   });
+
+  router.get('/createUser', function (req, res) {
+    var user = User.create({
+      username: 'admin',
+      password: 'allagash',
+    });
+    console.log(user);
+    res.render('admin/login');
+  });
   router.get('/logout', function (req, res) {
     req.logout();
     res.redirect('/');
