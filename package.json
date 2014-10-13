@@ -4,7 +4,7 @@
   "description": "Blog for amctammany.com",
   "main": "index.js",
   "scripts": {
-    "start": "gulp watch serve",
+    "start": "gulp serve watch",
     "test": "gulp test"
   },
   "repository": {

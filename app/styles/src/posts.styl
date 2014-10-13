@@ -1,22 +1,31 @@
-@import 'variables'
+@require 'variables'
 .post
   padding 10px
 
   background primary-color
   .post-body
-    padding 20px
+    padding 10px
     background secondary-color
-    padding-top 0px
+    padding-top 5px
   header
     border-radius 3px
     background tertiary-color
-    padding 5px
+    padding 5px 20px
     margin-bottom 10px
 
     .title
       display block
       width 100%
-      font normal small-caps 1.8em Times New Roman, sans-serif
+      font small-caps bold 1.8em Times New Roman, sans-serif
+      h1
+        margin-bottom 0
+      a
+        font-weight bold
+        color black
+
+        &:hover
+          //color secondary-color
+          text-decoration underline
 
       .timestamp
         font-style italic
@@ -39,12 +48,13 @@
           margin 1px
           padding 1px
 
-  .content
+  .content, .summary
     p
       text-indent 25px
+      font-size 1.2em
     background tertiary-color
-    margin 5px
-    padding 5px
+    margin 0px
+    padding 25px
     img
       padding 10px
       background primary-color

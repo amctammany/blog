@@ -34,14 +34,14 @@ gulp.task('minify', function () {
 });
 
 gulp.task('stylus', function () {
-  gulp.src('app/styles/**/*.styl')
+  gulp.src('app/styles/src/app.styl')
     .pipe(plugins.stylus())
     .pipe(plugins.concat('app.css'))
     .pipe(gulp.dest('app/styles/'));
 });
 
 gulp.task('clean', function (cb) {
-  rimraf('./dist', cb)
+  rimraf('./dist', cb);
 });
 
 gulp.task('usemin', function () {
@@ -88,8 +88,6 @@ gulp.task('serve', ['stylus', 'minify'], function () {
   process.env.NODE_ENV = 'development';
   require('./app').listen(3000);
   plugins.livereload.listen();
-});
-gulp.task('watch', function () {
   gulp.watch('app/styles/**/*.styl', ['stylus']);
   gulp.watch('src/**/*.js', ['minify']);
   gulp.watch(['app/scripts/**/*.js', 'app/views/**/*.html', 'app/styles/app.css']).on('change', plugins.livereload.changed);
