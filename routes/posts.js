@@ -73,7 +73,7 @@ module.exports = function (app) {
   router.get('/search', function (req, res) {
     var q = req.query.q;
     var tags =  req.query.tags || [];
-    tags = typeof tags === 'array' ? tags : [tags];
+    tags = tags instanceof Array ? tags : [tags];
     async.parallel(searchResources(q, tags), function (err, result) {
       if (err) {
         console.log(err);
