@@ -87,7 +87,7 @@ module.exports = function (app) {
         return;
       }
       //console.log(result.posts);
-      res.render('posts/search', {posts: result.posts, tags: result.tags});
+      res.render('posts/search', {posts: result.posts, tags: result.tags, q: q});
     });
 
   });
