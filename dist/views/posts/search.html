@@ -5,7 +5,6 @@
       <div class="well post-sidebar">
         <form class="form" action="/posts/search" method="GET">
         <div class="input-group">
-          <%= q %>
           <input class="form-control" name="q" type="text" placeholder="Search"  value="<%= q %>"/>
           <span class="input-group-addon">
             <button type="submit" >
@@ -14,12 +13,20 @@
           </span>
         </div>
         <div class="tag-listings">
-            <% tags.forEach(function (tag) { %>
-              <span class="label label-default">
+          <%= selectedTags.map(function(a) {return a.name}) %>
+          <% tags.forEach(function (tag) { %>
+            <span class="tag-checkbox">
+              <label>
+                <input type="checkbox" name="tags" value="<%= tag.name %>" <%= selectedTags.indexOf(tag.name) > -1 ? 'checked' : '' %> >
+                <span class="label label-default"><%= tag.name %></span>
+
+              </label>
+            </span>
+              <!--<span class="label label-default">-->
                 <!--<span class="badge"><%= tag.posts.length %></span>-->
-                <%= tag.name %>
-              </span>
-            <% }) %>
+                <!--<%= tag.name %>-->
+              <!--</span>-->
+          <% }) %>
         </div>
         
       </form>

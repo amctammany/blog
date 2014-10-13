@@ -35,10 +35,10 @@ module.exports = function (app) {
     tags: tagsQuery.exec.bind(tagsQuery),
   };
 
-  var searchQuery = function (q) {
+  var searchQuery = function (q, tags) {
     return Post.find(
       {$text: {$search: '*' + q + '*'}}
-    ).populate('tags')
+    ).populate('tags').where('tags').in([tags])
   };
   var searchResources = function (q) {
     var search = searchQuery(q);
@@ -69,26 +69,25 @@ module.exports = function (app) {
   // GET /posts/search?q=query => Search
   router.get('/search', function (req, res) {
     var q = req.query.q;
-    var tags = req.query.tags;
-    //Post.find(
-      //{$text: { $search: '*'+q+'*'}}
-    //)
-    //.populate('tags')
-    //.exec(function (err, posts) {
-      //if (err) {console.log(err);}
-      //console.log(posts);
-      //res.render('posts/search', {posts: posts, tags: []});
-    //});
-
-
-    async.parallel(searchResources(q), function (err, result) {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      //console.log(result.posts);
-      res.render('posts/search', {posts: result.posts, tags: result.tags, q: q});
-    });
+    var tags =  req.query.tags;
+    if (process.env.NODE_ENV === 'production') {
+      async.parallel(searchResources(q, tags), function (err, result) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        //console.log(result.posts);
+        res.render('posts/search', {posts: result.posts, tags: result.tags, q: q, selectedTags: tags});
+      });
+    } else {
+      async.parallel(resources, function (err, result) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        res.render('posts/search', {posts: result.posts, tags: result.tags, q: q, selectedTags: tags});
+      });
+    }
 
   });
 
