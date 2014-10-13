@@ -36,11 +36,12 @@ module.exports = function (app) {
   };
 
   var searchQuery = function (q, tags) {
-    return (!!q ? Post.find(
+    var p = (!!q ? Post.find(
       {$text: {$search: q}}
     ) : Post.find({}))
-      .populate('tags')
-      .where('tagArray').in(tags);
+      .populate('tags');
+
+    return tags.length > 0 ? p.where('tagArray').in(tags) : p;
 
   };
   var searchResources = function (q, tags) {
@@ -74,6 +75,7 @@ module.exports = function (app) {
     var q = req.query.q;
     var tags =  req.query.tags || [];
     tags = tags instanceof Array ? tags : [tags];
+    console.log(tags);
     async.parallel(searchResources(q, tags), function (err, result) {
       if (err) {
         console.log(err);
