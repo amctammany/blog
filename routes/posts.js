@@ -36,9 +36,9 @@ module.exports = function (app) {
   };
 
   var searchQuery = function (q) {
-    return Post.search(q, {title: 1}, {
-      limit: 10
-    });
+    return Post.find(
+      {$text: {$search: '*' + q + '*'}}
+    ).populate('tags')
   };
   var searchResources = function (q) {
     var search = searchQuery(q);
@@ -70,32 +70,25 @@ module.exports = function (app) {
   router.get('/search', function (req, res) {
     var q = req.query.q;
     var tags = req.query.tags;
-    Post.find(
-      {$text: { $search: q}}
-    )
-    .exec(function (err, posts) {
-      if (err) {console.log(err);}
-      console.log(posts);
-      res.render('posts/search', {posts: posts, tags: []});
+    //Post.find(
+      //{$text: { $search: '*'+q+'*'}}
+    //)
+    //.populate('tags')
+    //.exec(function (err, posts) {
+      //if (err) {console.log(err);}
+      //console.log(posts);
+      //res.render('posts/search', {posts: posts, tags: []});
+    //});
+
+
+    async.parallel(searchResources(q), function (err, result) {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      //console.log(result.posts);
+      res.render('posts/search', {posts: result.posts, tags: result.tags});
     });
-
-    //Post.search(q, {title: 2}, {
-      //limit: 10,
-      //populate: [{path: 'Post', fields: '_id'}]
-    //}, function (err, data) {
-      //console.log(data);
-      //res.render('posts/search', {posts: data.results, tags: []});
-
-    //});
-
-    //async.parallel(searchResources(q), function (err, result) {
-      //if (err) {
-        //console.log(err);
-        //return;
-      //}
-      ////console.log(result.posts);
-      //res.render('posts/search', {posts: result.posts, tags: result.tags});
-    //});
 
   });
 
