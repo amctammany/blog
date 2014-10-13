@@ -61,15 +61,28 @@ body {
   width: 80%;
   margin: 0 auto;
 }
+.post-search,
 .post-sidebar {
   background: #eee;
 }
+.post-search .tag-listings,
 .post-sidebar .tag-listings {
   padding: 5px;
 }
+.post-search .tag-listings .tag-checkbox input[type="checkbox"],
+.post-sidebar .tag-listings .tag-checkbox input[type="checkbox"] {
+  display: none;
+}
+.post-search .tag-listings .tag-checkbox input[type="checkbox"]:checked + .label,
+.post-sidebar .tag-listings .tag-checkbox input[type="checkbox"]:checked + .label {
+  background: #00f;
+}
+.post-search .tag-listings .label,
 .post-sidebar .tag-listings .label {
+  font-size: 1em;
+  font-weight: normal;
   display: inline-block;
   margin: 2px;
-  padding: 2px 4px;
+  padding: 5px;
 }
 
