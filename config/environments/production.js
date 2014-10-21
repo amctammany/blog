@@ -26,9 +26,9 @@ module.exports = function (app, passport) {
     app.engine('html', require('ejs').renderFile);
     app.set('view engine', 'html');
     app.use('/', express.static(path.join(app.directory, 'dist')));
-    app.use('/src', express.static(path.join(app.directory, 'src')));
-    app.use('/images', express.static(path.join(app.directory, 'images')));
-    app.use('/doc', express.static(path.join(app.directory, 'doc')));
+    //app.use('/src', express.static(path.join(app.directory, 'src')));
+    app.use('/images', express.static(path.join(app.directory, 'dist', 'images')));
+    //app.use('/doc', express.static(path.join(app.directory, 'doc')));
     app.use(bodyParser());
     app.use(cookieParser());
 
