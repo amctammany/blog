@@ -1,15 +1,15 @@
 .post {
-  padding: 10px;
+  padding: 3px;
+  margin: 3px;
   background: #eee;
 }
 .post .post-body {
-  padding: 10px;
-  background: #acf;
+  padding: 2px;
+  background: #fafafa;
   padding-top: 5px;
 }
 .post header {
   border-radius: 3px;
-  background: #fef;
   padding: 5px 20px;
   margin-bottom: 10px;
 }
@@ -52,9 +52,8 @@
 }
 .post .content,
 .post .summary {
-  background: #fef;
   margin: 0px;
-  padding: 25px;
+  padding: 5px;
 }
 .post .content p,
 .post .summary p {
@@ -63,7 +62,7 @@
 }
 .post .content img,
 .post .summary img {
-  padding: 10px;
+  padding: 5px;
   background: #eee;
   display: block;
   width: 80%;
@@ -75,7 +74,7 @@
 }
 .post-search .tag-listings,
 .post-sidebar .tag-listings {
-  padding: 5px;
+  padding: 2px;
 }
 .post-search .tag-listings .tag-checkbox input[type="checkbox"],
 .post-sidebar .tag-listings .tag-checkbox input[type="checkbox"] {
@@ -94,6 +93,7 @@
   padding: 5px;
 }
 body {
+  padding: 0;
   background: #ccc;
   font-family: Open Sans, sans-serif;
 }

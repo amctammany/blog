@@ -88,9 +88,10 @@ gulp.task('serve', ['stylus', 'minify'], function () {
   process.env.NODE_ENV = 'development';
   require('./app').listen(3000);
   plugins.livereload.listen();
+});
+gulp.task('watch', function () {
   gulp.watch('app/styles/**/*.styl', ['stylus']);
   gulp.watch('src/**/*.js', ['minify']);
   gulp.watch(['app/scripts/**/*.js', 'app/views/**/*.html', 'app/styles/app.css']).on('change', plugins.livereload.changed);
 });
-
 gulp.task('default', ['jsdoc', 'build']);

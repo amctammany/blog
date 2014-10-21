@@ -9,13 +9,13 @@
 6 info start blog@0.0.0
 7 verbose unsafe-perm in lifecycle true
 8 info blog@0.0.0 Failed to exec start script
-9 error blog@0.0.0 start: `gulp watch serve`
+9 error blog@0.0.0 start: `gulp serve watch`
 9 error Exit status 1
 10 error Failed at the blog@0.0.0 start script.
 10 error This is most likely a problem with the blog package,
 10 error not with npm itself.
 10 error Tell the author that this fails on your system:
-10 error     gulp watch serve
+10 error     gulp serve watch
 10 error You can get their info via:
 10 error     npm owner ls blog
 10 error There is likely additional logging output above.
