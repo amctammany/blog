@@ -1,7 +1,5 @@
 var express = require('express'),
     routes = require('./routes'),
-    mongoose = require('mongoose'),
-    path = require('path')
     passport = require('passport');
 
 var app = express();
