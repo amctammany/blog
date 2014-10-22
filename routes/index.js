@@ -42,7 +42,7 @@ module.exports = function (app, passport) {
   var Post = mongoose.model('Post');
   var Tag = mongoose.model('Tag');
   require('./admin')(app);
-  //require('./demos')(app);
+  require('./demos')(app);
   require('./posts')(app);
   //require('./tags')(app);
   //require('./projects')(app);
