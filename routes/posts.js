@@ -39,7 +39,8 @@ module.exports = function (app) {
     var p = (!!q ? Post.find(
       {$text: {$search: q}}
     ) : Post.find({}))
-      .populate('tags');
+      .populate('tags')
+      .sort('-createdAt');
 
     return tags.length > 0 ? p.where('tagArray').in(tags) : p;
 
@@ -75,7 +76,6 @@ module.exports = function (app) {
     var q = req.query.q;
     var tags =  req.query.tags || [];
     tags = tags instanceof Array ? tags : [tags];
-    console.log(tags);
     async.parallel(searchResources(q, tags), function (err, result) {
       if (err) {
         console.log(err);

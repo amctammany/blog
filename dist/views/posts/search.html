@@ -55,7 +55,7 @@
                   <h4>
                     <span class="glyphicon glyphicon-tags"></span>
                     <% post.tags.forEach(function (tag) { %>
-                      <a href="/tags/<%= tag.name %>" class="tag"><%= tag.name %></a>
+                      <a href="/posts/search?q=&tags=<%= tag.name %>" class="tag"><%= tag.name %></a>
                     <% }) %>
                   </h4>
 

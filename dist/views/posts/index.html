@@ -16,10 +16,12 @@
       </form>
         <div class="tag-listings">
             <% tags.forEach(function (tag) { %>
+              <a href="/posts/search?q=&tags=<%= tag.name %>">
               <span class="label label-default">
                 <!--<span class="badge"><%= tag.posts.length %></span>-->
                 <%= tag.name %>
               </span>
+              </a>
             <% }) %>
         </div>
         
@@ -48,7 +50,7 @@
                   <h4>
                     <span class="glyphicon glyphicon-tags"></span>
                     <% post.tags.forEach(function (tag) { %>
-                      <a href="/tags/<%= tag.name %>" class="tag"><%= tag.name %></a>
+                      <a href="/posts/search?q=&tags=<%= tag.name %>" class="tag"><%= tag.name %></a>
                     <% }) %>
                   </h4>
 
@@ -58,7 +60,9 @@
             
             </header>
             <div class="summary">
-              <%- post.summary %>
+              <blockquote>
+                <%- post.summary %>
+              </blockquote>
             </div>
           </div>
         </div>
