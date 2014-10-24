@@ -3,10 +3,9 @@
 // Add Canvas to demo element
 var container = document.getElementById('particles-demo-container');
 var canvas = container.appendChild(document.createElement('canvas'));
+var ctx = canvas.getContext('2d');
 canvas.width = container.clientWidth;
 canvas.height = 0.66 * canvas.width;
-
-var ctx = canvas.getContext('2d');
 
 var clear = function clear() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -20,17 +19,14 @@ var update = function update() {
 function drawCircle(obj) {
   ctx.fillStyle = obj.fill;
   ctx.beginPath();
-  ctx.arc(obj.position.x * canvas.width, obj.position.y * canvas.height, 10, 0, 6.28);
+  ctx.arc(obj.position.x * canvas.width, obj.position.y * canvas.height, obj.radius, 0, 6.28);
   ctx.closePath();
   ctx.fill();
 }
 var render = function render() {
-  world.particles.forEach(function (p) {
-    p.draw(ctx);
-  });
+  world.particles.forEach(drawCircle);
   world.emitters.forEach(drawCircle);
   world.fields.forEach(drawCircle);
-
 };
 
 var loop = function loop() {
@@ -65,6 +61,11 @@ Vector.prototype.mul = function (s) {
 Vector.prototype.clone = function () {
   return new Vector(this.x, this.y);
 };
+Vector.prototype.zero = function () {
+  this.x = 0;
+  this.y = 0;
+  return this;
+};
 Vector.fromAngle = function (angle, distance) {
   return new Vector(distance * Math.cos(angle), distance * Math.sin(angle));
 };
@@ -74,7 +75,6 @@ var World = function (emitters, fields) {
   this.fields = fields || [];
 
   this.maxParticles = 500;
-  this.generationRate = 5;
 };
 
 World.prototype.generateParticles = function () {
@@ -102,11 +102,14 @@ var Particle = function (position, velocity, acceleration) {
   this.position = position || new Vector(0, 0);
   this.velocity = velocity || new Vector(0, 0);
   this.acceleration = acceleration || new Vector(0, 0);
+  this.radius = 2;
+  this.fill = 'black';
 };
 
 Particle.prototype.integrate = function (delta) {
   this.velocity.add(this.acceleration.mul(delta * 0.5));
   this.position.add(this.velocity.mul(delta));
+  //this.acceleration.zero();
 };
 Particle.prototype.applyFields = function (fields) {
   var aX = 0, aY = 0;
@@ -122,19 +125,13 @@ Particle.prototype.applyFields = function (fields) {
   }.bind(this));
   this.acceleration = new Vector(aX, aY);
 };
-Particle.prototype.draw = function (ctx) {
-  ctx.fillStyle = 'black';
-  ctx.beginPath();
-  ctx.rect(this.position.x * canvas.width, this.position.y * canvas.height, 5, 5);
-  ctx.closePath();
-  ctx.fill();
-};
 
 
 var Emitter = function (position, velocity, sigma) {
   this.position = position;
   this.velocity = velocity;
   this.sigma = sigma || Math.PI / 16;
+  this.radius = 10;
   this.fill = '#9A9';
 };
 
@@ -149,12 +146,13 @@ Emitter.prototype.emit = function () {
 var Field = function (position, mass) {
   this.position = position;
   this.setMass(mass);
+  this.radius = 10;
 };
 Field.prototype.setMass = function (mass) {
   this.mass = mass || 1;
   this.fill = mass < 0 ? '#f00' : '#0f0';
 };
-var fields = [new Field(new Vector(0.5, 0.5), -0.1), new Field(new Vector(0.5, 0.15), 0.1)];
-var emitters = [new Emitter(new Vector(0.25, 0.25), Vector.fromAngle(Math.PI / 4, 0.15), Math.PI / 16)];
+var fields = [new Field(new Vector(0.5, 0.5), -0.1), new Field(new Vector(0.5, 0.15), 0.25)];
+var emitters = [new Emitter(new Vector(0.25, 0.45), Vector.fromAngle(Math.PI / 4, 0.15), Math.PI / 16)];
 var world = new World(emitters, fields);
 loop();
