@@ -3,6 +3,7 @@
 var mongoose = require('mongoose'),
     //searchPlugin = require('mongoose-search-plugin'),
     Schema = mongoose.Schema,
+    tocular = require('tocular'),
     Showdown = require('showdown'),
     converter = new Showdown.converter();
 
@@ -10,6 +11,7 @@ var PostSchema = new Schema({
   title: String,
   tagNames: String,
   tagArray: [String],
+  toc: String,
   tags: [{type: Schema.Types.ObjectId, ref: 'Tag'}],
   summary: String,
   content: String,
@@ -29,6 +31,7 @@ PostSchema.pre('save', function (next) {
     this.urlString = this.title.toLocaleLowerCase().replace(/\s+/g, '-');
   }
   this.tagNames = this.tagNames.toLocaleLowerCase();
+  this.toc = converter.makeHtml(tocular(this.content));
   this.html = converter.makeHtml(this.content);
   //this.createHtml();
   this.parseTags(next);

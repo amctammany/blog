@@ -38,7 +38,8 @@
     "bcrypt": "^0.8.0",
     "mongoose": "^3.8.17",
     "bcrypt-nodejs": "0.0.3",
-    "mongoose-search-plugin": "^0.1.2"
+    "mongoose-search-plugin": "^0.1.2",
+    "tocular": "0.0.1"
   },
   "devDependencies": {
     "karma-chrome-launcher": "^0.1.5",
