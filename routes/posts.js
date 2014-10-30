@@ -14,9 +14,10 @@ module.exports = function (app) {
       .exec(function (err, tags) {
         tags.forEach(function (tag) {
           var oldTags = tag.posts;
-          var newTags = tag.posts.filter(function(t) { return t.id;});
+          var newTags = tag.posts.filter(function(p) { return p.tags.indexOf(tag.id) >= 0;});
+          console.log(newTags.length);
 
-          if (tag.posts.length === 0) {
+          if (newTags.length === 0) {
             console.log('Tag: ' + tag + ' has no posts ');
             tag.remove(function (err, removedTag) {
               //console.log(removedTag);
