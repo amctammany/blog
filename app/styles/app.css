@@ -94,3 +94,6 @@ body {
   background: #ccc;
   font-family: Open Sans, sans-serif;
 }
+.demo-container {
+  border: 2px solid #000;
+}

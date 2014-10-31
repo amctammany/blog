@@ -9,5 +9,9 @@ module.exports = function (app) {
     res.render('demos/particles', {});
   });
 
+  router.get('/collisions', function (req, res) {
+    res.render('demos/collisions', {});
+  });
+
   app.use('/demos', router);
 };

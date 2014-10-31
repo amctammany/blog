@@ -6,6 +6,38 @@ var canvas = container.appendChild(document.createElement('canvas'));
 var ctx = canvas.getContext('2d');
 canvas.width = container.clientWidth;
 canvas.height = 0.66 * canvas.width;
+function getMousePosition(e) {
+  var bbox = canvas.getBoundingClientRect();
+  return {
+    x: e.clientX - bbox.left * (canvas.width / bbox.width),
+    y: e.clientY - bbox.top * (canvas.height / bbox.height)
+  };
+}
+var selectedObj, dragStart;
+canvas.onmousedown = function (e) {
+  var pos = getMousePosition(e);
+  var obj = world.select(pos.x, pos.y);
+  if (obj) {
+    selectedObj = obj[0];
+    dragStart = new Vector(pos.x, pos.y);
+  }
+  console.log(obj);
+};
+canvas.onmousemove = function (e) {
+  if (!selectedObj) {
+    return;
+  }
+  var pos = getMousePosition(e);
+  var diff = dragStart.add(pos);
+  dragStart = new Vector(pos.x, pos.y);
+  selectedObj.position = new Vector(pos.x / canvas.width, pos.y / canvas.height);
+};
+canvas.onmouseup = function (e) {
+  selectedObj = void 0;
+};
+canvas.onmouseout = function (e) {
+  selectedObj = void 0;
+};
 
 var clear = function clear() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -36,43 +68,12 @@ var loop = function loop() {
   window.requestAnimationFrame(loop);
 };
 
-var Vector = function (x, y) {
-  this.x = x || 0;
-  this.y = y || 0;
-};
-
-Vector.prototype.add = function (v) {
-  this.x += v.x;
-  this.y += v.y;
-  return this;
-};
-Vector.prototype.sqLength = function () {
-  return (this.x * this.x + this.y * this.y);
-};
-Vector.prototype.length = function () {
-  return Math.sqrt(this.sqLength());
-};
-Vector.prototype.angle = function () {
-  return Math.atan2(this.y, this.x);
-};
-Vector.prototype.mul = function (s) {
-  return new Vector(this.x * s, this.y * s);
-};
-Vector.prototype.clone = function () {
-  return new Vector(this.x, this.y);
-};
-Vector.prototype.zero = function () {
-  this.x = 0;
-  this.y = 0;
-  return this;
-};
-Vector.fromAngle = function (angle, distance) {
-  return new Vector(distance * Math.cos(angle), distance * Math.sin(angle));
-};
 var World = function (emitters, fields) {
   this.particles = [];
   this.emitters = emitters || [];
   this.fields = fields || [];
+
+  this.shapes = this.emitters.concat(this.fields);
 
   this.maxParticles = 500;
 };
@@ -92,10 +93,18 @@ World.prototype.update = function (delta) {
     particle.applyFields(world.fields);
     particle.integrate(delta);
     pos = particle.position;
-    return (pos.x < 0 || pos.x > 1 || pos.y < 0 || pos.y > 1) ? false : true;
+    return (pos.x < 0 || pos.x > canvas.width || pos.y < 0 || pos.y > canvas.height) ? false : true;
   });
   this.particles = aliveParticles;
 };
+
+World.prototype.select = function (x, y) {
+  var v = new Vector(x / canvas.width, y / canvas.height);
+  return this.shapes.filter(function (s) {
+    return s.position.sub(v).length() <= s.radius / canvas.width;
+  });
+};
+
 
 
 var Particle = function (position, velocity, acceleration) {
@@ -107,8 +116,8 @@ var Particle = function (position, velocity, acceleration) {
 };
 
 Particle.prototype.integrate = function (delta) {
-  this.velocity.add(this.acceleration.mul(delta * 0.5));
-  this.position.add(this.velocity.mul(delta));
+  this.velocity.iadd(this.acceleration.mul(delta * 0.5));
+  this.position.iadd(this.velocity.mul(delta));
   //this.acceleration.zero();
 };
 Particle.prototype.applyFields = function (fields) {
