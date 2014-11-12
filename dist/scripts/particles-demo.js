@@ -45,7 +45,7 @@ var clear = function clear() {
 
 var update = function update() {
   world.generateParticles();
-  world.update(0.01);
+  world.update(0.02);
 };
 
 function drawCircle(obj) {
@@ -128,7 +128,7 @@ Particle.prototype.applyFields = function (fields) {
     vX = f.position.x - this.position.x;
     vY = f.position.y - this.position.y;
 
-    force = f.mass / Math.pow(vX*vX + vY*vY, 1/2);
+    force = 2 * f.mass / Math.pow(vX*vX + vY*vY, 1/2);
     aX += vX * force;
     aY += vY * force;
   }.bind(this));
@@ -139,7 +139,7 @@ Particle.prototype.applyFields = function (fields) {
 var Emitter = function (position, velocity, sigma) {
   this.position = position;
   this.velocity = velocity;
-  this.sigma = sigma || Math.PI / 16;
+  this.sigma = sigma || Math.PI / 32;
   this.radius = 10;
   this.fill = '#9A9';
 };
@@ -161,7 +161,8 @@ Field.prototype.setMass = function (mass) {
   this.mass = mass || 1;
   this.fill = mass < 0 ? '#f00' : '#0f0';
 };
-var fields = [new Field(new Vector(0.5, 0.5), -0.1), new Field(new Vector(0.5, 0.15), 0.25)];
-var emitters = [new Emitter(new Vector(0.25, 0.45), Vector.fromAngle(Math.PI / 4, 0.15), Math.PI / 16)];
+//var fields = [new Field(new Vector(0.5, 0.5), -0.1), new Field(new Vector(0.5, 0.15), 0.25)];
+var fields = [new Field(new Vector(0.5, 0.5), 0.2)];
+var emitters = [new Emitter(new Vector(0.25, 0.45), Vector.fromAngle(Math.PI / 4, 0.05), Math.PI / 16)];
 var world = new World(emitters, fields);
 loop();
