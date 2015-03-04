@@ -15,13 +15,16 @@ module.exports = function (app) {
         tags.forEach(function (tag) {
           var oldTags = tag.posts;
           var newTags = tag.posts.filter(function(p) { return p.tags.indexOf(tag.id) >= 0;});
-          console.log(newTags.length);
+          //console.log(newTags.length);
 
           if (newTags.length === 0) {
             console.log('Tag: ' + tag + ' has no posts ');
             tag.remove(function (err, removedTag) {
               //console.log(removedTag);
             });
+          } else {
+            tag.count = newTags.length;
+            tag.save();
           }
         });
       });
@@ -30,9 +33,11 @@ module.exports = function (app) {
 
   var router = express.Router();
   var postsQuery = Post.find({}).populate('tags').sort('-createdAt');
-  var tagsQuery = Tag.find({}).sort('+name');
+  var topPostsQuery = Post.find({}).sort('-viewCount').limit(10);
+  var tagsQuery = Tag.find({}).sort('-count');
   var resources = {
     posts: postsQuery.exec.bind(postsQuery),
+    topPosts: topPostsQuery.exec.bind(topPostsQuery),
     tags: tagsQuery.exec.bind(tagsQuery),
   };
 
@@ -68,7 +73,11 @@ module.exports = function (app) {
         console.log(err);
         return;
       }
-      res.render('posts/index', {posts: result.posts, tags: result.tags});
+      res.render('posts/index', {
+        posts: result.posts,
+        tags: result.tags,
+        topPosts: result.topPosts,
+      });
     });
   });
 
@@ -83,7 +92,12 @@ module.exports = function (app) {
         return;
       }
       //console.log(result.posts);
-      res.render('posts/search', {posts: result.posts, tags: result.tags, q: q, selectedTags: tags});
+      res.render('posts/search', {
+        posts: result.posts,
+        tags: result.tags,
+        q: q,
+        selectedTags: tags
+      });
     });
 
   });
@@ -109,6 +123,7 @@ module.exports = function (app) {
       .exec(function (err, post) {
         if (err) { console.log(err); }
         res.render('posts/show', {post: post})
+        post.incrementViewCount();
       });
   });
 

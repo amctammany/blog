@@ -4,27 +4,42 @@
     <div class="col-lg-3 col-md-3 col-sm-4">
       <div class="well post-sidebar">
         <form class="form" action="/posts/search" method="GET">
-        <div class="input-group">
-          <input class="form-control" name="q" type="text" placeholder="Search"  value=""/>
-          <span class="input-group-btn">
-            <button type="submit" class="btn btn-default">
-              <span class="glyphicon glyphicon-search" ></span>
-              &nbsp;
-            </button>
-          </span>
-        </div>
-      </form>
-        <div class="tag-listings">
-            <% tags.forEach(function (tag) { %>
-              <a href="/posts/search?q=&tags=<%= tag.name %>">
-              <span class="label label-default">
-                <!--<span class="badge"><%= tag.posts.length %></span>-->
-                <%= tag.name %>
-              </span>
-              </a>
+          <div class="input-group">
+            <input class="form-control" name="q" type="text" placeholder="Search"  value=""/>
+            <span class="input-group-btn">
+              <button type="submit" class="btn btn-default">
+                <span class="glyphicon glyphicon-search"></span>
+                &nbsp;
+              </button>
+            </span>
+          </div>
+        </form>
+        <div class="top-posts">
+          <h3>Top Posts</h3>
+          <ol>
+            <% topPosts.forEach(function (post) { %>
+              <li>
+                <a href="/posts/<%= post.urlString %>"><%= post.title %></a>
+                <%= post.viewCount %>
+              </li>
             <% }) %>
+          </ol>
         </div>
-        
+        <div class="tag-listings">
+          <h3>Tags</h3>
+          <ul>
+            <% tags.forEach(function (tag) { %>
+              <li>
+              
+              <a href="/posts/search?q=&tags=<%= tag.name %>">
+                <%= tag.name %>
+              </a>
+                <span class="badge"><%= tag.count %></span>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+
       </div>
     </div>
 

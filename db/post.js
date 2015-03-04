@@ -9,6 +9,7 @@ var mongoose = require('mongoose'),
 
 var PostSchema = new Schema({
   title: String,
+  viewCount: {type: Number, default: 0},
   tagNames: String,
   tagArray: [String],
   toc: String,
@@ -39,6 +40,11 @@ PostSchema.pre('save', function (next) {
 PostSchema.methods.createHtml = function (cb) {
   this.html = converter.makeHtml(this.content);
   cb();
+};
+
+PostSchema.methods.incrementViewCount = function () {
+  this.viewCount++;
+  this.save();
 };
 
 PostSchema.methods.parseTags = function (cb) {

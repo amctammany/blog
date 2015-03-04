@@ -61,20 +61,24 @@
       margin 0 auto
 
 
-.post-search, .post-sidebar
+.post-search
   background primary-color
   .tag-listings
-    padding 2px
+    padding 1px
+    //background secondary-color
+    //text-align center
     .tag-checkbox
       input[type="checkbox"]
         display none
       input[type="checkbox"]:checked + .label
           background blue
     .label
-      font-size 1.0em
+      font-size 0.9em
       font-weight normal
       display inline-block
       margin 2px
-      padding 5px
+      padding 2px 5px
 
-      
+.tag-listings
+  li a
+    padding-right 10px
