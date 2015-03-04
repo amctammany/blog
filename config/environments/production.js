@@ -10,7 +10,7 @@ var express = require('express'),
 module.exports = function (app, passport) {
   var env = process.env.NODE_ENV;
   if ('production' === env) {
-    var mongoUrl = 'localhost:27017/blog';
+    var mongoUrl = 'amctammany.com:27017/blog';
 
 
 
