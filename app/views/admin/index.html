@@ -17,9 +17,13 @@
       </tr>
     <% posts.forEach(function (post) { %>
       <tr>
-        <td><%= post.title %></td>
+        <td>
+          <a href="/posts/<%= post.urlString %>">
+            <%= post.title %>
+          </a>
+        </td>
         <td>#</td>
-        <td>#</td>
+        <td><%= post.viewCount %></td>
         <td>
           <a href="/posts/<%= post.urlString %>/edit">Edit</a>
         </td>
