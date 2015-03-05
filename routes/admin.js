@@ -57,6 +57,15 @@ module.exports = function (app) {
     res.render('admin/comments', {demo: 'Pendulum'});
   });
 
+  router.get('/:id', app.isLoggedIn, function (req, res) {
+    Post.findOne({urlString: req.params.id})
+      .populate('tags')
+      .exec(function (err, post) {
+        if (err) { console.log(err); }
+        res.render('posts/edit', {post: post})
+      })
+  })
+
   app.use('/admin', router);
 
 };

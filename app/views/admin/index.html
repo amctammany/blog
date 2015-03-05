@@ -25,7 +25,7 @@
         <td>#</td>
         <td><%= post.viewCount %></td>
         <td>
-          <a href="/posts/<%= post.urlString %>/edit">Edit</a>
+          <a href="/admin/<%= post.urlString %>">Edit</a>
         </td>
         <td><a data-method="DELETE" href="/posts/<%= post.urlString %>" confirm="Are you sure?">Delete</a></td>
       </tr>

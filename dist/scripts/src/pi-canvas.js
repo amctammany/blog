@@ -16,7 +16,6 @@ class PiCanvas {
   }
   changeMethod(method) {
     this.reset();
-    console.log(method);
     this.method = method;
   }
 
