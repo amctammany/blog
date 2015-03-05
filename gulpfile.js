@@ -44,6 +44,12 @@ gulp.task('clean', function (cb) {
   rimraf('./dist', cb);
 });
 
+gulp.task('babel', function () {
+  gulp.src('app/scripts/src/**/*.js')
+    .pipe(plugins.babel())
+    .pipe(gulp.dest('app/scripts/'));
+});
+
 gulp.task('usemin', function () {
   gulp.src('app/**/*.html')
     .pipe(plugins.usemin({
@@ -91,7 +97,7 @@ gulp.task('serve', ['stylus', 'minify'], function () {
 });
 gulp.task('watch', function () {
   gulp.watch('app/styles/**/*.styl', ['stylus']);
-  gulp.watch('src/**/*.js', ['minify']);
+  gulp.watch('app/scripts/src/**/*.js', ['babel']);
   gulp.watch(['app/scripts/**/*.js', 'app/views/**/*.html', 'app/styles/app.css']).on('change', plugins.livereload.changed);
 });
 gulp.task('default', ['jsdoc', 'build']);

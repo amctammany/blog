@@ -13,5 +13,8 @@ module.exports = function (app) {
     res.render('demos/collisions', {});
   });
 
+  router.get('/pi', function (req, res) {
+    res.render('demos/pi', {});
+  });
   app.use('/demos', router);
 };

@@ -1,0 +1,30 @@
+<% include ../header.html %>
+<h2>Evaluating pi - Direct Method</h2>
+
+<div class="jumbotron">
+  <div class="btn-group" id="selection-toolbar" role="toolbar" data-toggle="buttons">
+    <label class="btn btn-primary active" onclick="canvas.changeMethod('random')">
+      <input type="radio" name="sampling_method" class="sampling-method-btn" value="random">Random Sampling
+    </label>
+
+    <label class="btn btn-primary" onclick="canvas.changeMethod('sequential')">
+      <input type="radio" name="sampling_method" class="sampling-method-btn" value="markov">Markov Sequential Sampling
+    </label>
+  </div>
+  <div>
+    <div class="btn-group">
+      <span class="btn btn-info">Add Test Instance</span>
+      <button class="btn btn-default" onclick="canvas.addInstance(1)">1x</button>
+      <button class="btn btn-default" onclick="canvas.addInstance(10)">10x</button>
+      <button class="btn btn-default" onclick="canvas.addInstance(50)">50x</button>
+      <button class="btn btn-default" onclick="canvas.addInstance(100)">100x</button>
+      <button class="btn btn-default" onclick="canvas.addInstance(500)">500x</button>
+    </div>
+  
+  </div>
+  <div id="pi-demo-container"></div>
+</div>
+
+<script src="/scripts/pi-canvas.js"></script>
+<script src="/scripts/pi-eval.js"></script>
+<% include ../footer.html %>
