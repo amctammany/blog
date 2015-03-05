@@ -108,12 +108,13 @@ module.exports = function (app) {
   });
   // GET /posts/id/edit => Edit
   router.get('/:id/edit', app.isLoggedIn, function (req, res) {
-    Post.findOne({urlString: req.params.id})
-      .populate('tags')
-      .exec(function (err, post) {
-        if (err) { console.log(err); }
-        res.render('posts/edit', {post: post})
-      });
+    res.redirect('/admin/' + req.params.id);
+    //Post.findOne({urlString: req.params.id})
+      //.populate('tags')
+      //.exec(function (err, post) {
+        //if (err) { console.log(err); }
+        //res.render('posts/edit', {post: post})
+      //});
   });
 
   // GET /posts/id => Show
