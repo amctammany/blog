@@ -11,11 +11,14 @@ class Module {
   constructor(id, config, priv = {}) {
     this.id = id;
     this.config = config;
+    this.behaviors = [];
 
     priv.behaviors = priv.behaviors || arr => {
-      return arr.map(b => {
-        Behavior.find(b).applyTo(this)
-      })
+      arr.forEach(b => Behavior.find(b).applyTo(this));
+      return this.behaviors;
+      //return arr.reduce((acc, b) => {
+        //return acc.concat.apply(acc, Behavior.find(b).applyTo(this));
+      //}, this.behaviors);
     }
   applyConfig(this, config, priv);
   }
@@ -107,6 +110,13 @@ class Behavior extends Module {
     super(id, config, {
       requires: arr => {
         return obj => {
+
+
+          //return arr.reduce((acc, b) => {
+            //return acc.concat.apply(acc, Behavior.find(b).applyTo(obj));
+          //}, obj.behaviors);
+
+
           arr.forEach(bhvr => {
             Behavior.find(bhvr).applyTo(obj);
           });
@@ -117,13 +127,20 @@ class Behavior extends Module {
     this.keys = Object.keys(config);
   }
   applyTo(obj) {
+    obj.methods = obj.methods || [];
+    if (this.hasOwnProperty('requires')) this.requires(obj);
     this.keys.forEach(k => {
       if (this[k] instanceof Function) {
-        obj[k] = this[k](obj);
+        if (k !== 'requires') {
+          obj[k] = this[k](obj);
+          obj.methods.push(k);
+        }
       } else {
         obj[k] = this[k];
       }
     });
+    obj.behaviors.push(this.id);
+    return obj;
   }
 }
 Behavior.create('point', {
@@ -157,6 +174,9 @@ Behavior.create('circle', {
       ctx.fill();
     };
   },
+  doCircleStuff: _ => {
+    console.log('circle stuff');
+  },
 });
 
 Behavior.create('rect', {
@@ -168,6 +188,9 @@ Behavior.create('rect', {
       ctx.fillStyle = fillStyle;
       ctx.fillRect(x, y, width, height);
     }
+  },
+  doRectStuff: _ => {
+    console.log('rect stuff');
   },
 })
 

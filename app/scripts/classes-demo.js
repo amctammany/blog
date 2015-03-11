@@ -32,11 +32,16 @@ var Module = (function () {
 
     this.id = id;
     this.config = config;
+    this.behaviors = [];
 
     priv.behaviors = priv.behaviors || function (arr) {
-      return arr.map(function (b) {
-        Behavior.find(b).applyTo(_this);
+      arr.forEach(function (b) {
+        return Behavior.find(b).applyTo(_this);
       });
+      return _this.behaviors;
+      //return arr.reduce((acc, b) => {
+      //return acc.concat.apply(acc, Behavior.find(b).applyTo(this));
+      //}, this.behaviors);
     };
     applyConfig(this, config, priv);
   }
@@ -203,6 +208,11 @@ var Behavior = (function (Module) {
     _get(Object.getPrototypeOf(Behavior.prototype), "constructor", this).call(this, id, config, {
       requires: function (arr) {
         return function (obj) {
+
+          //return arr.reduce((acc, b) => {
+          //return acc.concat.apply(acc, Behavior.find(b).applyTo(obj));
+          //}, obj.behaviors);
+
           arr.forEach(function (bhvr) {
             Behavior.find(bhvr).applyTo(obj);
           });
@@ -219,13 +229,20 @@ var Behavior = (function (Module) {
       value: function applyTo(obj) {
         var _this = this;
 
+        obj.methods = obj.methods || [];
+        if (this.hasOwnProperty("requires")) this.requires(obj);
         this.keys.forEach(function (k) {
           if (_this[k] instanceof Function) {
-            obj[k] = _this[k](obj);
+            if (k !== "requires") {
+              obj[k] = _this[k](obj);
+              obj.methods.push(k);
+            }
           } else {
             obj[k] = _this[k];
           }
         });
+        obj.behaviors.push(this.id);
+        return obj;
       },
       writable: true,
       configurable: true
@@ -272,6 +289,9 @@ Behavior.create("circle", {
       ctx.closePath();
       ctx.fill();
     };
+  },
+  doCircleStuff: function (_) {
+    console.log("circle stuff");
   } });
 
 Behavior.create("rect", {
@@ -292,6 +312,9 @@ Behavior.create("rect", {
       ctx.fillStyle = fillStyle;
       ctx.fillRect(x, y, width, height);
     };
+  },
+  doRectStuff: function (_) {
+    console.log("rect stuff");
   } });
 
 var config = {
