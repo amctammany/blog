@@ -1,5 +1,7 @@
 "use strict";
 
+var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; for (var _iterator = arr[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) { _arr.push(_step.value); if (i && _arr.length === i) break; } return _arr; } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } };
+
 var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
@@ -33,7 +35,7 @@ var Module = (function () {
 
     priv.behaviors = priv.behaviors || function (arr) {
       return arr.map(function (b) {
-        Behavior.get(b).applyTo(_this);
+        Behavior.find(b).applyTo(_this);
       });
     };
     applyConfig(this, config, priv);
@@ -51,8 +53,8 @@ var Module = (function () {
       writable: true,
       configurable: true
     },
-    get: {
-      value: function get(id) {
+    find: {
+      value: function find(id) {
         return this._children[id];
       },
       writable: true,
@@ -60,7 +62,11 @@ var Module = (function () {
     },
     children: {
       value: function children() {
-        return this._children;
+        var _this = this;
+
+        return Object.keys(this._children).map(function (k) {
+          return _this._children[k];
+        });
       },
       writable: true,
       configurable: true
@@ -86,9 +92,26 @@ var Canvas = (function (Module) {
     this.canvas = document.body.appendChild(document.createElement("canvas"));
     this.ctx = this.canvas.getContext("2d");
     _get(Object.getPrototypeOf(Canvas.prototype), "constructor", this).call(this, id, config);
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
   }
 
   _inherits(Canvas, Module);
+
+  _prototypeProperties(Canvas, null, {
+    update: {
+      value: function update() {
+        var _this = this;
+
+        this.render();
+        BodyType.children().forEach(function (t) {
+          t.drawAll(_this.ctx);
+        });
+      },
+      writable: true,
+      configurable: true
+    }
+  });
 
   return Canvas;
 })(Module);
@@ -113,6 +136,21 @@ var BodyType = (function (Module) {
   _inherits(BodyType, Module);
 
   _prototypeProperties(BodyType, null, {
+    get: {
+      value: function get(body) {
+        var _this = this;
+
+        for (var _len = arguments.length, vars = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          vars[_key - 1] = arguments[_key];
+        }
+
+        return vars.map(function (v) {
+          return body.hasOwnProperty(v) ? body[v] : _this[v];
+        });
+      },
+      writable: true,
+      configurable: true
+    },
     addProperties: {
       value: function addProperties(props) {
         var _this = this;
@@ -126,10 +164,18 @@ var BodyType = (function (Module) {
       writable: true,
       configurable: true
     },
+    children: {
+      value: function children() {
+        return this._children;
+      },
+      writable: true,
+      configurable: true
+    },
     createBody: {
       value: function createBody(config) {
         //let body = new this._body(config);
-        return this._children.push(config);
+        this._children.push(config);
+        return config;
       },
       writable: true,
       configurable: true
@@ -154,7 +200,15 @@ var Behavior = (function (Module) {
   function Behavior(id, config) {
     _classCallCheck(this, Behavior);
 
-    _get(Object.getPrototypeOf(Behavior.prototype), "constructor", this).call(this, id, config);
+    _get(Object.getPrototypeOf(Behavior.prototype), "constructor", this).call(this, id, config, {
+      requires: function (arr) {
+        return function (obj) {
+          arr.forEach(function (bhvr) {
+            Behavior.find(bhvr).applyTo(obj);
+          });
+          return arr;
+        };
+      } });
     this.keys = Object.keys(config);
   }
 
@@ -181,6 +235,14 @@ var Behavior = (function (Module) {
   return Behavior;
 })(Module);
 
+Behavior.create("point", {
+  properties: ["x", "y"],
+  move: function (obj) {
+    return function (body, x, y) {
+      body.x = x;
+      body.y = y;
+    };
+  } });
 Behavior.create("canvas", {
   properties: ["x", "y", "width", "height", "fillStyle"],
   render: function (obj) {
@@ -191,23 +253,44 @@ Behavior.create("canvas", {
   }
 });
 Behavior.create("circle", {
-  properties: ["x", "y", "radius", "fillStyle"],
+  requires: ["point"],
+  properties: ["radius", "fillStyle"],
   render: function (obj) {
-    return function (ctx) {
-      ctx.fillStyle = obj.fillStyle;
+    return function (ctx, body) {
+      var _obj$get = obj.get(body, "x", "y", "radius", "fillStyle");
+
+      var _obj$get2 = _slicedToArray(_obj$get, 4);
+
+      var x = _obj$get2[0];
+      var y = _obj$get2[1];
+      var radius = _obj$get2[2];
+      var fillStyle = _obj$get2[3];
+
+      ctx.fillStyle = fillStyle;
       ctx.beginPath();
-      ctx.arc(obj.x, obj.y, obj.radius, 0, 6.28, 0);
+      ctx.arc(x, y, radius, 0, 6.28, 0);
       ctx.closePath();
       ctx.fill();
     };
   } });
 
 Behavior.create("rect", {
-  properties: ["x", "y", "width", "height", "fillStyle"],
+  requires: ["point"],
+  properties: ["width", "height", "fillStyle"],
   render: function (obj) {
-    return function (ctx) {
-      ctx.fillStyle = obj.fillStyle;
-      ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+    return function (ctx, body) {
+      var _obj$get = obj.get(body, "x", "y", "width", "height", "fillStyle");
+
+      var _obj$get2 = _slicedToArray(_obj$get, 5);
+
+      var x = _obj$get2[0];
+      var y = _obj$get2[1];
+      var width = _obj$get2[2];
+      var height = _obj$get2[3];
+      var fillStyle = _obj$get2[4];
+
+      ctx.fillStyle = fillStyle;
+      ctx.fillRect(x, y, width, height);
     };
   } });
 
@@ -215,8 +298,6 @@ var config = {
   BodyType: {
     circle: {
       behaviors: ["circle"],
-      x: 10,
-      y: 10,
       fillStyle: "red",
       radius: 15 },
     rect: {
@@ -240,13 +321,16 @@ function load(config) {
 }
 
 load(config);
-BodyType.get("circle").createBody({ x: 100, y: 100 });
-BodyType.get("rect").createBody({ x: 10, y: 10 });
 
-var circle = BodyType.get("circle");
-var rect = BodyType.get("rect");
-var canvas = Canvas.get("canvas");
+var circle = BodyType.find("circle");
+var rect = BodyType.find("rect");
+var canvas = Canvas.find("canvas");
 var ctx = canvas.ctx;
+
+var c1 = circle.createBody({ x: 150, y: 150 });
+var r1 = rect.createBody({ x: 10, y: 10 });
+
+canvas.update();
 
 //behaviors: arr => {
 //return arr.map(b => {

@@ -30,7 +30,7 @@ class Module {
     return this._children[id];
   }
   static children() {
-    return this._children;
+    return Object.keys(this._children).map(k => this._children[k]);
   }
   static create(id, config) {
     this._children = this._children || {};
@@ -44,6 +44,14 @@ class Canvas extends Module {
     this.canvas = document.body.appendChild(document.createElement('canvas'));
     this.ctx = this.canvas.getContext('2d');
     super(id, config);
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
+  }
+  update() {
+    this.render();
+    BodyType.children().forEach(t => {
+      t.drawAll(this.ctx);
+    });
   }
 }
 
@@ -66,6 +74,12 @@ class BodyType extends Module {
     });
   }
 
+  get(body, ...vars) {
+    return vars.map(v => {
+      return body.hasOwnProperty(v) ? body[v] : this[v];
+    });
+  }
+
   addProperties(props) {
     props.forEach(p => {
       if (this.properties.indexOf(p) < 0) {
@@ -73,9 +87,13 @@ class BodyType extends Module {
       }
     });
   }
+  children() {
+    return this._children;
+  }
   createBody(config) {
     //let body = new this._body(config);
-    return this._children.push(config);
+    this._children.push(config);
+    return config;
   }
   drawAll(ctx) {
     this._children.forEach(b => {
@@ -86,7 +104,16 @@ class BodyType extends Module {
 
 class Behavior extends Module {
   constructor(id, config) {
-    super(id, config);
+    super(id, config, {
+      requires: arr => {
+        return obj => {
+          arr.forEach(bhvr => {
+            Behavior.find(bhvr).applyTo(obj);
+          });
+          return arr;
+        };
+      },
+    });
     this.keys = Object.keys(config);
   }
   applyTo(obj) {
@@ -99,6 +126,15 @@ class Behavior extends Module {
     });
   }
 }
+Behavior.create('point', {
+  properties: ['x', 'y'],
+  move: obj => {
+    return (body, x, y) => {
+      body.x = x;
+      body.y = y;
+    }
+  },
+});
 Behavior.create('canvas', {
   properties: ['x', 'y', 'width', 'height', 'fillStyle'],
   render: obj => {
@@ -109,12 +145,14 @@ Behavior.create('canvas', {
   }
 });
 Behavior.create('circle', {
-  properties: ['x', 'y', 'radius', 'fillStyle'],
+  requires: ['point'],
+  properties: ['radius', 'fillStyle'],
   render: obj => {
-    return ctx => {
-      ctx.fillStyle = obj.fillStyle;
+    return (ctx, body) => {
+      var [x, y, radius, fillStyle] = obj.get(body, 'x', 'y', 'radius', 'fillStyle');
+      ctx.fillStyle = fillStyle;
       ctx.beginPath();
-      ctx.arc(obj.x, obj.y, obj.radius, 0, 6.28, 0);
+      ctx.arc(x, y, radius, 0, 6.28, 0);
       ctx.closePath();
       ctx.fill();
     };
@@ -122,11 +160,13 @@ Behavior.create('circle', {
 });
 
 Behavior.create('rect', {
-  properties: ['x', 'y', 'width', 'height', 'fillStyle'],
+  requires: ['point'],
+  properties: ['width', 'height', 'fillStyle'],
   render: obj => {
-    return ctx => {
-      ctx.fillStyle = obj.fillStyle;
-      ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+    return (ctx, body) => {
+      var [x, y, width, height, fillStyle] = obj.get(body, 'x', 'y', 'width', 'height', 'fillStyle');
+      ctx.fillStyle = fillStyle;
+      ctx.fillRect(x, y, width, height);
     }
   },
 })
@@ -135,8 +175,6 @@ let config = {
   BodyType: {
     'circle': {
       behaviors: ['circle'],
-      x: 10,
-      y: 10,
       fillStyle: 'red',
       radius: 15,
     },
@@ -166,10 +204,13 @@ function load(config) {
 }
 
 load(config);
-BodyType.find('circle').createBody({x: 100, y: 100});
-BodyType.find('rect').createBody({x: 10, y: 10});
 
 let circle = BodyType.find('circle');
 let rect = BodyType.find('rect');
 let canvas = Canvas.find('canvas');
 let ctx = canvas.ctx;
+
+let c1 = circle.createBody({x: 150, y: 150});
+let r1 = rect.createBody({x: 10, y: 10});
+
+canvas.update();
