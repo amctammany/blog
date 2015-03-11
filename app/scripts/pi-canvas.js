@@ -26,7 +26,6 @@ var PiCanvas = (function () {
     changeMethod: {
       value: function changeMethod(method) {
         this.reset();
-        console.log(method);
         this.method = method;
       },
       writable: true,
@@ -138,6 +137,7 @@ var PiCanvas = (function () {
           this.testPoints.push(p);
         }
         this.update();
+        return 4 * (this.hitCount / this.totalCount);
       },
       writable: true,
       configurable: true
@@ -163,6 +163,7 @@ var PiCanvas = (function () {
         this.x = x;
         this.y = y;
         this.update();
+        return 4 * (this.hitCount / this.totalCount);
       },
       writable: true,
       configurable: true

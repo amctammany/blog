@@ -16,5 +16,10 @@ module.exports = function (app) {
   router.get('/pi', function (req, res) {
     res.render('demos/pi', {});
   });
+
+  router.get('/classes', function (req, res) {
+    res.render('demos/classes', {});
+  });
+
   app.use('/demos', router);
 };
