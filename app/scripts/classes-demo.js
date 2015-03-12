@@ -15,7 +15,7 @@ function applyConfig(obj, config) {
 
   Object.keys(config).forEach(function (key) {
     if (priv && priv.hasOwnProperty(key) && priv[key] instanceof Function) {
-      obj[key] = priv[key].call(obj, config[key]);
+      priv[key].call(obj, config[key]);
     } else {
       obj[key] = config[key];
     }
@@ -33,6 +33,7 @@ var Module = (function () {
     this.id = id;
     this.config = config;
     this.behaviors = [];
+    this.properties = [];
 
     priv.behaviors = priv.behaviors || function (arr) {
       arr.forEach(function (b) {
@@ -42,6 +43,9 @@ var Module = (function () {
       //return arr.reduce((acc, b) => {
       //return acc.concat.apply(acc, Behavior.find(b).applyTo(this));
       //}, this.behaviors);
+    };
+    priv.properties = priv.properties || function (arr) {
+      _this.addProperties(arr);
     };
     applyConfig(this, config, priv);
   }
@@ -85,6 +89,21 @@ var Module = (function () {
       writable: true,
       configurable: true
     }
+  }, {
+    addProperties: {
+      value: function addProperties(props) {
+        var _this = this;
+
+        props.forEach(function (p) {
+          if (_this.properties.indexOf(p) < 0) {
+            _this.properties.push(p);
+          }
+        });
+        return this.properties;
+      },
+      writable: true,
+      configurable: true
+    }
   });
 
   return Module;
@@ -121,21 +140,47 @@ var Canvas = (function (Module) {
   return Canvas;
 })(Module);
 
+function BodyFactory(parent, properties, methods) {
+  var _body = function Body(config) {
+    var _this = this;
+
+    properties.forEach(function (p) {
+      _this[p] = config[p] ? config[p] : parent[p];
+    });
+  };
+  var proto = {};
+  methods.forEach(function (m) {
+    proto[m] = function () {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      args.unshift(this);
+      console.log(args);
+
+      parent[m].apply(this, args);
+    };
+  });
+  _body.prototype = Object.create(proto);
+  return _body;
+}
+
 var BodyType = (function (Module) {
   function BodyType(id, config) {
     var _this = this;
 
     _classCallCheck(this, BodyType);
 
-    this.properties = [];
     this._children = [];
-    _get(Object.getPrototypeOf(BodyType.prototype), "constructor", this).call(this, id, config, {
-      properties: function (props) {
-        _this.addProperties(props);
-      } });
-    this.ivars = this.properties.filter(function (p) {
-      return _this.hasOwnProperty(p);
+    _get(Object.getPrototypeOf(BodyType.prototype), "constructor", this).call(this, id, config, {});
+    //this.ivars = this.properties.filter(p => {
+    //return this.hasOwnProperty(p);
+    //});
+    var proto = {};
+    this.methods.forEach(function (k) {
+      proto[k] = _this[k];
     });
+    this._body = BodyFactory(this, this.properties, this.methods);
   }
 
   _inherits(BodyType, Module);
@@ -156,20 +201,16 @@ var BodyType = (function (Module) {
       writable: true,
       configurable: true
     },
-    addProperties: {
-      value: function addProperties(props) {
-        var _this = this;
-
-        props.forEach(function (p) {
-          if (_this.properties.indexOf(p) < 0) {
-            _this.properties.push(p);
-          }
-        });
-      },
-      writable: true,
-      configurable: true
-    },
     children: {
+
+      //addProperties(props) {
+      //props.forEach(p => {
+      //if (this.properties.indexOf(p) < 0) {
+      //this.properties.push(p);
+      //}
+      //});
+      //}
+
       value: function children() {
         return this._children;
       },
@@ -178,9 +219,9 @@ var BodyType = (function (Module) {
     },
     createBody: {
       value: function createBody(config) {
-        //let body = new this._body(config);
-        this._children.push(config);
-        return config;
+        var body = new this._body(config);
+        this._children.push(body);
+        return body;
       },
       writable: true,
       configurable: true
@@ -190,7 +231,7 @@ var BodyType = (function (Module) {
         var _this = this;
 
         this._children.forEach(function (b) {
-          _this.render(ctx, b);
+          _this.render(b, ctx);
         });
       },
       writable: true,
@@ -203,23 +244,24 @@ var BodyType = (function (Module) {
 
 var Behavior = (function (Module) {
   function Behavior(id, config) {
+    var _this = this;
+
     _classCallCheck(this, Behavior);
 
+    this.methods = Object.keys(config);
     _get(Object.getPrototypeOf(Behavior.prototype), "constructor", this).call(this, id, config, {
       requires: function (arr) {
-        return function (obj) {
 
-          //return arr.reduce((acc, b) => {
-          //return acc.concat.apply(acc, Behavior.find(b).applyTo(obj));
-          //}, obj.behaviors);
+        //return arr.reduce((acc, b) => {
+        //return acc.concat.apply(acc, Behavior.find(b).applyTo(obj));
+        //}, obj.behaviors);
 
-          arr.forEach(function (bhvr) {
-            Behavior.find(bhvr).applyTo(obj);
-          });
-          return arr;
-        };
+        arr.forEach(function (bhvr) {
+          console.log(_this);
+          Behavior.find(bhvr).applyTo(_this);
+        });
+        return arr;
       } });
-    this.keys = Object.keys(config);
   }
 
   _inherits(Behavior, Module);
@@ -229,18 +271,29 @@ var Behavior = (function (Module) {
       value: function applyTo(obj) {
         var _this = this;
 
+        //console.log(obj);
         obj.methods = obj.methods || [];
-        if (this.hasOwnProperty("requires")) this.requires(obj);
-        this.keys.forEach(function (k) {
+        this.methods.forEach(function (k) {
           if (_this[k] instanceof Function) {
-            if (k !== "requires") {
+            if (obj instanceof Behavior) {
+              console.log("adding behavior to behavior");
+              obj[k] = _this[k];
+            } else {
+
               obj[k] = _this[k](obj);
-              obj.methods.push(k);
             }
+            obj.methods.push(k);
           } else {
-            obj[k] = _this[k];
+            if (k !== "properties") {
+              obj[k] = _this[k];
+            }
           }
         });
+        //if (this.hasOwnProperty('requires') && this.requires instanceof Function) this.requires(obj);
+        if (this.hasOwnProperty("properties")) {
+          obj.addProperties(this.properties);
+        }
+
         obj.behaviors.push(this.id);
         return obj;
       },
@@ -273,7 +326,7 @@ Behavior.create("circle", {
   requires: ["point"],
   properties: ["radius", "fillStyle"],
   render: function (obj) {
-    return function (ctx, body) {
+    return function (body, ctx) {
       var _obj$get = obj.get(body, "x", "y", "radius", "fillStyle");
 
       var _obj$get2 = _slicedToArray(_obj$get, 4);
@@ -298,7 +351,7 @@ Behavior.create("rect", {
   requires: ["point"],
   properties: ["width", "height", "fillStyle"],
   render: function (obj) {
-    return function (ctx, body) {
+    return function (body, ctx) {
       var _obj$get = obj.get(body, "x", "y", "width", "height", "fillStyle");
 
       var _obj$get2 = _slicedToArray(_obj$get, 5);
@@ -355,6 +408,9 @@ var r1 = rect.createBody({ x: 10, y: 10 });
 
 canvas.update();
 
+//properties: props => {
+//this.addProperties(props);
+//},
 //behaviors: arr => {
 //return arr.map(b => {
 //Behavior.get(b).applyTo(this._body.prototype);
