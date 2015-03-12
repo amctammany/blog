@@ -78,14 +78,15 @@ function BodyFactory(parent, properties, methods) {
   let proto = {};
   methods.forEach(m => {
     proto[m] = function(...args) {
-
       args.unshift(this);
-      console.log(args)
-
+      //console.log(args)
       parent[m].apply(this, args);
     };
   });
-  _body.prototype = Object.create(proto);
+  _body.prototype = proto;
+  _body.prototype.get = function(...args) {
+    return args.map(a => this[a]);
+  };
   return _body;
 }
 class BodyType extends Module {
@@ -104,19 +105,19 @@ class BodyType extends Module {
     //this.ivars = this.properties.filter(p => {
       //return this.hasOwnProperty(p);
     //});
-    let proto = {};
-    this.methods.forEach(k => {
-      proto[k] = this[k]
-    })
+    //let proto = {};
+    //this.methods.forEach(k => {
+      //proto[k] = this[k]
+    //})
     this._body = BodyFactory(this, this.properties, this.methods);
   }
 
 
-  get(body, ...vars) {
-    return vars.map(v => {
-      return body.hasOwnProperty(v) ? body[v] : this[v];
-    });
-  }
+  //get(body, ...vars) {
+    //return vars.map(v => {
+      //return body.hasOwnProperty(v) ? body[v] : this[v];
+    //});
+  //}
 
   //addProperties(props) {
     //props.forEach(p => {
@@ -206,12 +207,21 @@ Behavior.create('canvas', {
     }
   }
 });
+
+Behavior.create('canvas2', {
+  properties: ['sx', 'sy'],
+  stretch: obj => {
+    return _ => {
+      console.log('stretch');
+    };
+  },
+});
 Behavior.create('circle', {
   requires: ['point'],
   properties: ['radius', 'fillStyle'],
   render: obj => {
     return (body, ctx) => {
-      var [x, y, radius, fillStyle] = obj.get(body, 'x', 'y', 'radius', 'fillStyle');
+      var [x, y, radius, fillStyle] = body.get('x', 'y', 'radius', 'fillStyle');
       ctx.fillStyle = fillStyle;
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, 6.28, 0);
@@ -229,7 +239,7 @@ Behavior.create('rect', {
   properties: ['width', 'height', 'fillStyle'],
   render: obj => {
     return (body, ctx) => {
-      var [x, y, width, height, fillStyle] = obj.get(body, 'x', 'y', 'width', 'height', 'fillStyle');
+      var [x, y, width, height, fillStyle] = body.get('x', 'y', 'width', 'height', 'fillStyle');
       ctx.fillStyle = fillStyle;
       ctx.fillRect(x, y, width, height);
     }
@@ -255,7 +265,7 @@ let config = {
   },
   Canvas: {
     'canvas': {
-      behaviors: ['canvas'],
+      behaviors: ['canvas', 'canvas2'],
       x: 0,
       y: 0,
       width: 500,

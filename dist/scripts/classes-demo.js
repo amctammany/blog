@@ -156,19 +156,27 @@ function BodyFactory(parent, properties, methods) {
       }
 
       args.unshift(this);
-      console.log(args);
-
+      //console.log(args)
       parent[m].apply(this, args);
     };
   });
-  _body.prototype = Object.create(proto);
+  _body.prototype = proto;
+  _body.prototype.get = function () {
+    var _this = this;
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return args.map(function (a) {
+      return _this[a];
+    });
+  };
   return _body;
 }
 
 var BodyType = (function (Module) {
   function BodyType(id, config) {
-    var _this = this;
-
     _classCallCheck(this, BodyType);
 
     this._children = [];
@@ -176,32 +184,23 @@ var BodyType = (function (Module) {
     //this.ivars = this.properties.filter(p => {
     //return this.hasOwnProperty(p);
     //});
-    var proto = {};
-    this.methods.forEach(function (k) {
-      proto[k] = _this[k];
-    });
+    //let proto = {};
+    //this.methods.forEach(k => {
+    //proto[k] = this[k]
+    //})
     this._body = BodyFactory(this, this.properties, this.methods);
   }
 
   _inherits(BodyType, Module);
 
   _prototypeProperties(BodyType, null, {
-    get: {
-      value: function get(body) {
-        var _this = this;
-
-        for (var _len = arguments.length, vars = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          vars[_key - 1] = arguments[_key];
-        }
-
-        return vars.map(function (v) {
-          return body.hasOwnProperty(v) ? body[v] : _this[v];
-        });
-      },
-      writable: true,
-      configurable: true
-    },
     children: {
+
+      //get(body, ...vars) {
+      //return vars.map(v => {
+      //return body.hasOwnProperty(v) ? body[v] : this[v];
+      //});
+      //}
 
       //addProperties(props) {
       //props.forEach(p => {
@@ -322,19 +321,27 @@ Behavior.create("canvas", {
     };
   }
 });
+
+Behavior.create("canvas2", {
+  properties: ["sx", "sy"],
+  stretch: function (obj) {
+    return function (_) {
+      console.log("stretch");
+    };
+  } });
 Behavior.create("circle", {
   requires: ["point"],
   properties: ["radius", "fillStyle"],
   render: function (obj) {
     return function (body, ctx) {
-      var _obj$get = obj.get(body, "x", "y", "radius", "fillStyle");
+      var _body$get = body.get("x", "y", "radius", "fillStyle");
 
-      var _obj$get2 = _slicedToArray(_obj$get, 4);
+      var _body$get2 = _slicedToArray(_body$get, 4);
 
-      var x = _obj$get2[0];
-      var y = _obj$get2[1];
-      var radius = _obj$get2[2];
-      var fillStyle = _obj$get2[3];
+      var x = _body$get2[0];
+      var y = _body$get2[1];
+      var radius = _body$get2[2];
+      var fillStyle = _body$get2[3];
 
       ctx.fillStyle = fillStyle;
       ctx.beginPath();
@@ -352,15 +359,15 @@ Behavior.create("rect", {
   properties: ["width", "height", "fillStyle"],
   render: function (obj) {
     return function (body, ctx) {
-      var _obj$get = obj.get(body, "x", "y", "width", "height", "fillStyle");
+      var _body$get = body.get("x", "y", "width", "height", "fillStyle");
 
-      var _obj$get2 = _slicedToArray(_obj$get, 5);
+      var _body$get2 = _slicedToArray(_body$get, 5);
 
-      var x = _obj$get2[0];
-      var y = _obj$get2[1];
-      var width = _obj$get2[2];
-      var height = _obj$get2[3];
-      var fillStyle = _obj$get2[4];
+      var x = _body$get2[0];
+      var y = _body$get2[1];
+      var width = _body$get2[2];
+      var height = _body$get2[3];
+      var fillStyle = _body$get2[4];
 
       ctx.fillStyle = fillStyle;
       ctx.fillRect(x, y, width, height);
@@ -383,7 +390,7 @@ var config = {
       fillStyle: "green" } },
   Canvas: {
     canvas: {
-      behaviors: ["canvas"],
+      behaviors: ["canvas", "canvas2"],
       x: 0,
       y: 0,
       width: 500,
