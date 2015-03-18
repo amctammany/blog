@@ -21,5 +21,9 @@ module.exports = function (app) {
     res.render('demos/classes', {});
   });
 
+  router.get('/react', function (req, res) {
+    res.render('demos/react', {});
+  });
+
   app.use('/demos', router);
 };
