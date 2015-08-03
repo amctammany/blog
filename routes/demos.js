@@ -18,7 +18,7 @@ module.exports = function (app) {
   });
 
   router.get('/classes', function (req, res) {
-    res.render('demos/classes', {});
+    res.render('demos/classes', {cache: false});
   });
 
   router.get('/react', function (req, res) {

@@ -11,7 +11,7 @@ var express = require('express'),
 module.exports = function (app) {
   var env = process.env.NODE_ENV || 'development';
   if ('development' === env) {
-    var mongoUrl = 'amctammany.com:27017/blog';
+    var mongoUrl = '104.131.74.152:27017/blog';
 
 
 

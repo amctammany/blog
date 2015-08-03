@@ -113,7 +113,7 @@ var Canvas = (function (Module) {
   function Canvas(id, config) {
     _classCallCheck(this, Canvas);
 
-    this.canvas = document.body.appendChild(document.createElement("canvas"));
+    this.canvas = document.getElementById(id) ? document.getElementById(id) : document.body.appendChild(document.createElement("canvas"));
     this.ctx = this.canvas.getContext("2d");
     _get(Object.getPrototypeOf(Canvas.prototype), "constructor", this).call(this, id, config);
     this.canvas.width = this.width;
@@ -161,6 +161,9 @@ function BodyFactory(parent, properties, methods) {
     };
   });
   _body.prototype = proto;
+  _body.prototype.props = function () {
+    return Object.keys(this);
+  };
   _body.prototype.get = function () {
     var _this = this;
 
@@ -241,6 +244,145 @@ var BodyType = (function (Module) {
   return BodyType;
 })(Module);
 
+function ComponentFactory(parent, properties) {
+  var _component = function ComponentBody(config) {
+    var _this = this;
+
+    properties.forEach(function (p) {
+      _this[p] = config[p] ? config[p] : parent[p];
+    });
+  };
+  _component.prototype.render = function (node) {
+    //console.log('render comp');
+    parent.render(this, node);
+  };
+  //let proto = {};
+  //methods.forEach(m => {
+  //proto[m] = function(...args) {
+  //args.unshift(this);
+  ////console.log(args)
+  //parent[m].apply(this, args);
+  //};
+  //});
+  //_body.prototype = proto;
+  _component.prototype.props = function () {
+    return Object.keys(this);
+  };
+  //_body.prototype.get = function(...args) {
+  //return args.map(a => this[a]);
+  //};
+  return _component;
+}
+
+var Component = (function (Module) {
+  function Component(id, config) {
+    var _this = this;
+
+    _classCallCheck(this, Component);
+
+    this._children = [];
+    this._type = config._type || id;
+    this.methods = Object.keys(config).filter(function (m) {
+      return _this[m] instanceof Function;
+    });
+    this.methods.push("render");
+    _get(Object.getPrototypeOf(Component.prototype), "constructor", this).call(this, id, config, {});
+    this.properties.push("_type");
+    this.properties.push("properties");
+    this._component = ComponentFactory(this, this.properties);
+  }
+
+  _inherits(Component, Module);
+
+  _prototypeProperties(Component, null, {
+    children: {
+      value: function children() {
+        return this._children;
+      },
+      writable: true,
+      configurable: true
+    },
+    createComponent: {
+      value: function createComponent(config) {
+        var comp = new this._component(config);
+        this._children.push(comp);
+        return comp;
+      },
+      writable: true,
+      configurable: true
+    },
+    render: {
+      value: function render(comp, node) {
+        var virtualDOM = renderVirtualDOM(comp);
+        node.appendChild(virtualDOM);
+      },
+      writable: true,
+      configurable: true
+    }
+  });
+
+  return Component;
+})(Module);
+
+function renderVirtualDOM(comp) {
+  if (comp && comp._type) {
+    var _ret = (function () {
+      var node = document.createElement(comp._type);
+      var props = comp.props();
+      var children = comp.children || [];
+      //console.log(props);
+
+      if (props) {
+        props.forEach(function (k) {
+          if (k.indexOf("on") === 0) {
+            console.log("event listener");
+            node.addEventListener(k.substring(2).toLowerCase(), comp[k]);
+          } else if (k === "style") {
+            (function () {
+              var styles = comp[k];
+              Object.keys(styles).forEach(function (s) {
+                node.style[s] = styles[s];
+              });
+            })();
+          } else {
+            //console.log(k);
+            node[k] = comp[k];
+          }
+        });
+      }
+      //console.log(node);
+      if (comp.text) {
+        node.innerHTML = comp.text;
+      }
+      node.children = children.map(function (child) {
+        //console.log(child);
+        if (child !== null) {
+          //console.log(child);
+          if (child._type) {
+            //console.log(child._type)
+            child = Component.find(child._type).createComponent(child);
+            //child = comp.createComponent(child);
+          } else {
+            console.log("fucked up somehow?");
+          }
+          return node.appendChild(renderVirtualDOM(child));
+        }
+      });
+
+      return {
+        v: node
+      };
+    })();
+
+    if (typeof _ret === "object") {
+      return _ret.v;
+    }
+  } else {
+    console.log("else");
+    return document.createTextNode(comp);
+  }
+};
+
 var Behavior = (function (Module) {
   function Behavior(id, config) {
     var _this = this;
@@ -250,13 +392,7 @@ var Behavior = (function (Module) {
     this.methods = Object.keys(config);
     _get(Object.getPrototypeOf(Behavior.prototype), "constructor", this).call(this, id, config, {
       requires: function (arr) {
-
-        //return arr.reduce((acc, b) => {
-        //return acc.concat.apply(acc, Behavior.find(b).applyTo(obj));
-        //}, obj.behaviors);
-
         arr.forEach(function (bhvr) {
-          console.log(_this);
           Behavior.find(bhvr).applyTo(_this);
         });
         return arr;
@@ -275,7 +411,7 @@ var Behavior = (function (Module) {
         this.methods.forEach(function (k) {
           if (_this[k] instanceof Function) {
             if (obj instanceof Behavior) {
-              console.log("adding behavior to behavior");
+              //console.log('adding behavior to behavior')
               obj[k] = _this[k];
             } else {
 
@@ -304,6 +440,19 @@ var Behavior = (function (Module) {
   return Behavior;
 })(Module);
 
+Component.create("div", {
+  properties: ["style", "children"] });
+Component.create("canvas", {
+  properties: ["style", "id"]
+});
+Component.create("container", {
+  properties: ["style", "children"],
+  _type: "div" });
+Component.create("button", {
+  properties: ["style", "text", "onClick", "value", "children"] });
+Component.create("text", {
+  _type: "span",
+  properties: ["style", "text"] });
 Behavior.create("point", {
   properties: ["x", "y"],
   move: function (obj) {
@@ -403,15 +552,34 @@ function load(config) {
   });
 }
 
-load(config);
+function foobar() {
+  console.log("foobar!!!!");
+}
 
+var container = Component.find("container");
+var button = Component.find("button");
+var text = Component.find("text");
+var t1 = { _type: "text", style: { position: "absolute", left: 10, top: 10, color: "black" }, text: "foo" };
+var t2 = { _type: "text", style: { position: "absolute", left: 10, top: 30, color: "black" }, text: "bar" };
+var canv = { _type: "canvas", style: { position: "relative", left: 10, top: 30 }, id: "canvas" };
+var b = button.createComponent({ style: { position: "relative", left: 50, top: 50, width: 100, height: 100 }, value: "sexyfoobar", children: [t1, t2], onClick: function onClick(e) {
+    console.log("foobar");
+  } });
+var b2 = button.createComponent({ style: { position: "relative", left: 50, top: 170, width: 200, height: 100 }, value: "sexyfoobar", children: [{ _type: "text", style: { width: 200 }, text: "foo!" }], onClick: function onClick(e) {
+    console.log("foobar12");
+  } });
+var c = container.createComponent({ style: { position: "relative", left: 10, top: 10, width: 280, height: 280, background: "red" }, children: [b, b2] });
+var c2 = container.createComponent({ style: { position: "relative", left: 50, top: 50, width: 800, height: 800, background: "green" }, children: [c, canv, t2] });
+c2.render(document.body);
+load(config);
 var circle = BodyType.find("circle");
 var rect = BodyType.find("rect");
 var canvas = Canvas.find("canvas");
 var ctx = canvas.ctx;
-
 var c1 = circle.createBody({ x: 150, y: 150 });
 var r1 = rect.createBody({ x: 10, y: 10 });
+
+//b.render(document.body);
 
 canvas.update();
 

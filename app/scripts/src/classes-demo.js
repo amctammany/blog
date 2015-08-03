@@ -56,7 +56,7 @@ class Module {
 
 class Canvas extends Module {
   constructor(id, config) {
-    this.canvas = document.body.appendChild(document.createElement('canvas'));
+    this.canvas = document.getElementById(id) ? document.getElementById(id) : document.body.appendChild(document.createElement('canvas'));
     this.ctx = this.canvas.getContext('2d');
     super(id, config);
     this.canvas.width = this.width;
@@ -84,6 +84,9 @@ function BodyFactory(parent, properties, methods) {
     };
   });
   _body.prototype = proto;
+  _body.prototype.props = function () {
+    return Object.keys(this);
+  }
   _body.prototype.get = function(...args) {
     return args.map(a => this[a]);
   };
@@ -141,20 +144,113 @@ class BodyType extends Module {
   }
 }
 
+function ComponentFactory(parent, properties) {
+  let _component = function ComponentBody(config) {
+    properties.forEach(p => {
+      this[p] = config[p] ? config[p] : parent[p];
+    });
+  };
+  _component.prototype.render = function (node) {
+    //console.log('render comp');
+    parent.render(this, node);
+  };
+  //let proto = {};
+  //methods.forEach(m => {
+    //proto[m] = function(...args) {
+      //args.unshift(this);
+      ////console.log(args)
+      //parent[m].apply(this, args);
+    //};
+  //});
+  //_body.prototype = proto;
+  _component.prototype.props = function () {
+    return Object.keys(this);
+  }
+  //_body.prototype.get = function(...args) {
+    //return args.map(a => this[a]);
+  //};
+  return _component;
+
+}
+
+class Component extends Module {
+  constructor(id, config) {
+    this._children = [];
+    this._type = config._type || id;
+    this.methods = Object.keys(config).filter(m => this[m] instanceof Function);
+    this.methods.push('render');
+    super(id, config, {});
+    this.properties.push('_type');
+    this.properties.push('properties');
+    this._component = ComponentFactory(this, this.properties);
+  }
+  children() {
+    return this._children;
+  }
+  createComponent(config) {
+    let comp = new this._component(config);
+    this._children.push(comp);
+    return comp;
+  }
+  render(comp, node) {
+    let virtualDOM = renderVirtualDOM(comp);
+    node.appendChild(virtualDOM);
+  }
+}
+function renderVirtualDOM(comp) {
+  if (comp && comp._type) {
+    let node = document.createElement(comp._type);
+    let props = comp.props();
+    let children = comp.children || [];
+    //console.log(props);
+
+    if (props) {
+      props.forEach(function (k) {
+        if (k.indexOf('on') === 0) {
+          console.log('event listener')
+          node.addEventListener(k.substring(2).toLowerCase(), comp[k]);
+        } else if (k === 'style') {
+          let styles = comp[k];
+          Object.keys(styles).forEach(function (s) {
+            node.style[s] = styles[s];
+          });
+        } else {
+          //console.log(k);
+          node[k] = comp[k];
+        }
+      });
+    }
+    //console.log(node);
+    if (comp.text) {
+      node.innerHTML = comp.text;
+    }
+    node.children = children.map(function (child) {
+      //console.log(child);
+      if (child !== null) {
+        //console.log(child);
+        if (child._type) {
+          //console.log(child._type)
+          child = Component.find(child._type).createComponent(child);
+          //child = comp.createComponent(child);
+        } else {
+          console.log('fucked up somehow?');
+        }
+        return node.appendChild(renderVirtualDOM(child));
+      }
+    });
+
+    return node;
+  } else {
+    console.log('else');
+    return document.createTextNode(comp);
+  }
+};
 class Behavior extends Module {
   constructor(id, config) {
     this.methods = Object.keys(config);
     super(id, config, {
       requires: arr => {
-
-
-          //return arr.reduce((acc, b) => {
-            //return acc.concat.apply(acc, Behavior.find(b).applyTo(obj));
-          //}, obj.behaviors);
-
-
           arr.forEach(bhvr => {
-            console.log(this);
             Behavior.find(bhvr).applyTo(this);
           });
           return arr;
@@ -167,7 +263,7 @@ class Behavior extends Module {
     this.methods.forEach(k => {
       if (this[k] instanceof Function) {
         if (obj instanceof Behavior) {
-          console.log('adding behavior to behavior')
+          //console.log('adding behavior to behavior')
           obj[k] = this[k];
         } else {
 
@@ -189,6 +285,23 @@ class Behavior extends Module {
     return obj;
   }
 }
+Component.create('div', {
+  properties: ['style', 'children'],
+});
+Component.create('canvas', {
+  properties: ['style', 'id']
+})
+Component.create('container', {
+  properties: ['style', 'children'],
+  _type: 'div',
+});
+Component.create('button', {
+  properties: ['style', 'text', 'onClick', 'value', 'children'],
+});
+Component.create('text', {
+  _type: 'span',
+  properties: ['style', 'text'],
+});
 Behavior.create('point', {
   properties: ['x', 'y'],
   move: obj => {
@@ -281,14 +394,29 @@ function load(config) {
   });
 }
 
-load(config);
+function foobar() {
+  console.log('foobar!!!!')
+}
 
+let container = Component.find('container');
+let button = Component.find('button');
+let text = Component.find('text');
+let t1 = {_type: 'text', style: {position: 'absolute', left: 10, top: 10, color: 'black'}, text: 'foo'};
+let t2 = {_type: 'text', style: {position: 'absolute', left: 10, top: 30, color: 'black'}, text: 'bar'};
+let canv = {_type: 'canvas', style: {position: 'relative', left: 10, top: 30}, id: 'canvas' }
+let b = button.createComponent({style: {position: 'relative', left: 50, top: 50, width: 100, height: 100}, value: 'sexyfoobar', children: [t1, t2], onClick: function (e) { console.log('foobar')}});
+let b2 = button.createComponent({style: {position: 'relative', left: 50, top: 170, width: 200, height: 100}, value: 'sexyfoobar', children: [{_type: 'text', style: {width: 200}, text: 'foo!'}], onClick: function (e) { console.log('foobar12')}});
+let c = container.createComponent({style: {position: 'relative', left: 10, top: 10, width: 280, height: 280, background: 'red'}, children: [b, b2]});
+let c2 = container.createComponent({style: {position: 'relative', left: 50, top: 50, width: 800, height: 800, background: 'green'}, children: [c,canv, t2]})
+c2.render(document.body);
+load(config);
 let circle = BodyType.find('circle');
 let rect = BodyType.find('rect');
 let canvas = Canvas.find('canvas');
 let ctx = canvas.ctx;
-
 let c1 = circle.createBody({x: 150, y: 150});
 let r1 = rect.createBody({x: 10, y: 10});
+
+//b.render(document.body);
 
 canvas.update();
